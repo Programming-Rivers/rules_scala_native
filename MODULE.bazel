@@ -1,0 +1,95 @@
+"""Bazel module definition for rules_scala_native.
+
+Provides Bazel rules for building Scala Native applications:
+  - scala_native_library: compiles Scala sources to class + NIR files
+  - scala_native_binary: links NIR files into a native executable
+"""
+
+module(
+    name = "rules_scala_native",
+    version = "0.1.0",
+    bazel_compatibility = [">=9.0.0"],
+    compatibility_level = 1,
+)
+
+SCALA_VERSION = "3.8.1"
+
+bazel_dep(name = "bazel_skylib", version = "1.8.0")
+single_version_override(
+    module_name = "bazel_skylib",
+    version = "1.8.2",
+)
+
+bazel_dep(name = "platforms", version = "0.0.9")
+single_version_override(
+    module_name = "platforms",
+    version = "1.0.0",
+)
+
+bazel_dep(name = "rules_cc", version = "0.2.16")
+
+bazel_dep(name = "rules_java", version = "7.6.0")
+single_version_override(
+    module_name = "rules_java",
+    version = "9.3.0",
+)
+
+bazel_dep(name = "protobuf", version = "33.4")
+
+bazel_dep(
+    name = "rules_scala",
+    version = "7.2.2",
+)
+
+bazel_dep(name = "toolchains_llvm_bootstrapped", version = "0.3.1")
+
+register_toolchains(
+    "@toolchains_llvm_bootstrapped//toolchain:all",
+)
+
+########################## Configure Scala ####################################
+scala_config = use_extension(
+    "@rules_scala//scala/extensions:config.bzl",
+    "scala_config",
+)
+scala_config.settings(scala_version = SCALA_VERSION)
+use_repo(scala_config, "rules_scala_config")
+
+scala_deps = use_extension(
+    "@rules_scala//scala/extensions:deps.bzl",
+    "scala_deps",
+)
+scala_deps.scala()
+
+use_repo(
+    scala_deps,
+    "rules_scala_toolchains",
+)
+
+########################## Scala Native Artifacts #############################
+scala_native_deps = use_extension(
+    "//scala_native/extensions:deps.bzl",
+    "scala_native_deps",
+)
+
+use_repo(
+    scala_native_deps,
+    "io_bazel_rules_scala_junit_junit",
+    "org_scala_native_auxlib",
+    "org_scala_native_clib",
+    "org_scala_native_javalib",
+    "org_scala_native_junit_runtime",
+    "org_scala_native_nativelib",
+    "org_scala_native_nir",
+    "org_scala_native_nscplugin",
+    "org_scala_native_posixlib",
+    "org_scala_native_scalalib",
+    "org_scala_native_test_interface",
+    "org_scala_native_tools",
+    "org_scala_native_util",
+)
+
+register_toolchains(
+    "@rules_scala_toolchains//...:all",
+    "//scala_native:scala_native_toolchain",
+)
