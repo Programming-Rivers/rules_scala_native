@@ -80,6 +80,9 @@ def _scala_native_binary_impl(ctx):
     args.add("--clang", clang_path)
     args.add("--clang++", clang_pp_path)
     args.add("--linking_option", "-fuse-ld=lld")
+    args.add("--gc", ctx.attr.gc)
+    args.add("--mode", ctx.attr.mode)
+    args.add("--lto", ctx.attr.lto)
     # Flatten the classpath elements into a single string with the path separator
     args.add_joined("--cp", classpath, join_with=ctx.configuration.host_path_separator)
 
@@ -107,6 +110,21 @@ def _scala_native_binary_impl(ctx):
 _scala_native_binary_attrs = {
     "main_class": attr.string(mandatory = True),
     "deps": attr.label_list(providers = [JavaInfo]),
+    "gc": attr.string(
+        default = "immix",
+        values = ["immix", "commix", "boehm", "none"],
+        doc = "Garbage collector to use. Default: immix.",
+    ),
+    "mode": attr.string(
+        default = "debug",
+        values = ["debug", "releaseFast", "releaseFull", "releaseSize"],
+        doc = "Build mode. Default: debug.",
+    ),
+    "lto": attr.string(
+        default = "none",
+        values = ["none", "thin", "full"],
+        doc = "Link-Time Optimization mode. Default: none.",
+    ),
     "_cc_toolchain": attr.label(
         default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
     ),

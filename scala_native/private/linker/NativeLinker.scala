@@ -37,8 +37,37 @@ object NativeLinker {
     moduleName: String,
     clang: Path,
     clangPP: Path,
-    linkingOptions: Seq[String]
+    linkingOptions: Seq[String],
+    gc: GC,
+    mode: Mode,
+    lto: LTO,
   )
+
+  private def parseGC(value: String): GC = value match {
+    case "immix"  => GC.immix
+    case "commix" => GC.commix
+    case "boehm"  => GC.boehm
+    case "none"   => GC.none
+    case other    => throw new IllegalArgumentException(
+      s"Unknown GC: '$other'. Valid values: immix, commix, boehm, none")
+  }
+
+  private def parseMode(value: String): Mode = value match {
+    case "debug"       => Mode.debug
+    case "releaseFast" => Mode.releaseFast
+    case "releaseFull" => Mode.releaseFull
+    case "releaseSize" => Mode.releaseSize
+    case other         => throw new IllegalArgumentException(
+      s"Unknown mode: '$other'. Valid values: debug, releaseFast, releaseFull, releaseSize")
+  }
+
+  private def parseLTO(value: String): LTO = value match {
+    case "none" => LTO.none
+    case "thin" => LTO.thin
+    case "full" => LTO.full
+    case other  => throw new IllegalArgumentException(
+      s"Unknown LTO: '$other'. Valid values: none, thin, full")
+  }
 
   def parseArgs(args: Array[String]): LinkerOpts = {
     var mainClass: String = null
@@ -49,6 +78,9 @@ object NativeLinker {
     var clang: String = null
     var clangPP: String = null
     var linkingOptions: Seq[String] = Seq.empty
+    var gc: GC = GC.immix
+    var mode: Mode = Mode.debug
+    var lto: LTO = LTO.none
 
     var i = 0
     while (i < args.length) {
@@ -77,6 +109,15 @@ object NativeLinker {
         case "--linking_option" =>
           linkingOptions = linkingOptions :+ args(i + 1)
           i += 2
+        case "--gc" =>
+          gc = parseGC(args(i + 1))
+          i += 2
+        case "--mode" =>
+          mode = parseMode(args(i + 1))
+          i += 2
+        case "--lto" =>
+          lto = parseLTO(args(i + 1))
+          i += 2
         case other =>
           throw new IllegalArgumentException(s"Unknown argument: $other")
       }
@@ -84,7 +125,7 @@ object NativeLinker {
 
     if (mainClass == null || outputDir == null) {
       throw new IllegalArgumentException(
-        "Missing required arguments. Usage: --main <class> --output <dir> --cp <classpath> [--workdir <dir>] [--module_name <name>] [--clang <path>] [--clang++ <path>]"
+        "Missing required arguments. Usage: --main <class> --output <dir> --cp <classpath> [--workdir <dir>] [--module_name <name>] [--clang <path>] [--clang++ <path>] [--gc <gc>] [--mode <mode>] [--lto <lto>]"
       )
     }
 
@@ -102,7 +143,10 @@ object NativeLinker {
       moduleName = moduleName,
       clang = Paths.get(clang),
       clangPP = Paths.get(clangPP),
-      linkingOptions = linkingOptions
+      linkingOptions = linkingOptions,
+      gc = gc,
+      mode = mode,
+      lto = lto,
     )
   }
 
@@ -114,9 +158,9 @@ object NativeLinker {
     val nativeConfig = NativeConfig.empty
       .withClang(opts.clang)
       .withClangPP(opts.clangPP)
-      .withGC(GC.immix)
-      .withMode(Mode.debug)
-      .withLTO(LTO.none)
+      .withGC(opts.gc)
+      .withMode(opts.mode)
+      .withLTO(opts.lto)
       .withLinkStubs(true)
       .withLinkingOptions(Discover.linkingOptions() ++ opts.linkingOptions)
       .withCompileOptions(Discover.compileOptions())
@@ -135,13 +179,11 @@ object NativeLinker {
     // Use Scope and a dedicated ExecutionContext for Scala Native
     Scope { implicit scope =>
       val nThreads = java.lang.Runtime.getRuntime.availableProcessors()
-      implicit val ec: java.util.concurrent.ExecutorService =
+      implicit val ec: ExecutionContext =
         ExecutionContext.fromExecutorService(
           java.util.concurrent.Executors.newFixedThreadPool(nThreads)
         )
-      val buildResult = Try(Build.buildCachedAwait(config))
-      ec.shutdown()
-      buildResult.get
+      Build.buildCachedAwait(config)
     }
   }
 }
