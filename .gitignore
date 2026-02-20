@@ -1,0 +1,15 @@
+# Bazel artifacts
+bazel-*
+
+# Temp files
+tmp/
+*~
+*.swp
+.DS_store
+
+# IDE files
+.ijwb
+*.idea
+.bsp
+.metals
+.vscode
