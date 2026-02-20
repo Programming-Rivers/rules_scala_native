@@ -1,8 +1,9 @@
 """scala_native_library rule for compiling Scala to NIR.
 
-Injects the nscplugin compiler plugin via a private `_nscplugin_plugin`
-attribute that augments `ctx.attr.plugins` at analysis time. This works with
-any published version of rules_scala without upstream changes.
+The nscplugin compiler plugin is injected via the scala_native_library macro,
+which appends it to the user-provided `plugins` list. This ensures NIR
+generation happens during Scala compilation without requiring upstream changes
+to rules_scala.
 """
 
 load(
@@ -93,27 +94,13 @@ def phase_collect_jars_native(ctx, p):
         external_providers = {"JarsToLabelsInfo": deps_jars.jars2labels},
     )
 
-def _phase_inject_nscplugin(ctx, p):
-    """Inject the nscplugin for NIR generation into ctx.attr.plugins.
 
-    Published versions of rules_scala read plugins from ctx.attr.plugins
-    in phase_compile. This phase provides the nscplugin via the
-    `native_compile` struct so that:
-    - On rules_scala versions WITH the native_compile hook, it works directly.
-    - On any version, we also inject it via ctx.attr._nscplugin_plugin.
-    """
-    return struct(
-        scalacopts = [],
-        plugin = [ctx.attr._nscplugin_plugin],
-    )
 
 def _scala_native_library_impl(ctx):
     """Implementation of scala_native_library rule.
-    
-    The nscplugin is injected via the native_compile phase which provides
-    it as a plugin. On rules_scala versions with the hook in phase_compile,
-    it's picked up automatically. Otherwise, it's also in ctx.attr.plugins
-    via the _nscplugin_plugin attribute.
+
+    The nscplugin is included in ctx.attr.plugins by the macro wrapper,
+    so phase_compile picks it up automatically from the plugins attribute.
     """
     return run_phases(
         ctx,
@@ -125,7 +112,6 @@ def _scala_native_library_impl(ctx):
             ("dependency", phase_dependency_common),
             ("collect_jars", phase_collect_jars_native),
             ("scalacopts", phase_scalacopts),
-            ("native_compile", _phase_inject_nscplugin),
             ("compile", phase_compile_library),
             ("coverage", phase_coverage_library),
             ("merge_jars", phase_merge_jars),
@@ -172,12 +158,6 @@ _scala_native_library_attrs.update({
         allow_files = False,
         aspects = [_coverage_replacements_provider.aspect],
     ),
-    # Private attribute: the nscplugin compiler plugin for NIR generation.
-    # Uses Label() so it resolves in rules_scala_native's repo context,
-    # not the consuming module's context.
-    "_nscplugin_plugin": attr.label(
-        default = Label("@org_scala_native_nscplugin//jar"),
-    ),
 })
 
 _scala_native_library_attrs.update(resolve_deps)
@@ -186,14 +166,7 @@ _scala_native_library_attrs.update(toolchain_transition_attr)
 
 _scala_native_library_attrs.update(extras_phases([]))
 
-# Override the plugins attr to include the nscplugin by default.
-# phase_compile.bzl reads plugins from ctx.attr.plugins (line 128).
-# Using Label() ensures the nscplugin resolves in rules_scala_native's
-# repo context regardless of which module consumes this rule.
-_original_plugins_attr = _scala_native_library_attrs.get("plugins")
-_scala_native_library_attrs["plugins"] = attr.label_list(
-    default = [Label("@org_scala_native_nscplugin//jar")],
-)
+
 
 _scala_native_library_rule = rule(
     attrs = _scala_native_library_attrs,
