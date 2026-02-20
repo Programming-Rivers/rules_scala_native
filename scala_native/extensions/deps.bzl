@@ -25,7 +25,7 @@ load(
 # and are not visible to repos created by this extension under bzlmod.
 # Intra-extension deps (those starting with @org_scala_native_) are kept.
 _SCALA_NATIVE_ARTIFACTS = {
-    "io_bazel_rules_scala_junit_junit": {
+    "org_junit_junit": {
         "artifact": "junit:junit:4.12",
         "sha256": "59721f0805e223d84b90677887d9ff567dc534d7c502ca903c0c2b17f05c116a",
         "deps": [],
@@ -103,7 +103,7 @@ _SCALA_NATIVE_ARTIFACTS = {
         "sha256": "92cbfeb08127a2700d071bfe682e9670af0488ae91c5580538aa04bfdcbcac2b",
         "deps": [
             "@org_scala_native_test_interface",
-            "@io_bazel_rules_scala_junit_junit",
+            "@org_junit_junit",
         ],
     },
 }

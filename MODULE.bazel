@@ -59,7 +59,7 @@ scala_native_deps = use_extension(
 
 use_repo(
     scala_native_deps,
-    "io_bazel_rules_scala_junit_junit",
+    "org_junit_junit",
     "org_scala_native_auxlib",
     "org_scala_native_clib",
     "org_scala_native_javalib",
