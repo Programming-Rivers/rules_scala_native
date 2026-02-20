@@ -14,27 +14,12 @@ module(
 
 SCALA_VERSION = "3.8.1"
 
-bazel_dep(name = "bazel_skylib", version = "1.8.0")
-single_version_override(
-    module_name = "bazel_skylib",
-    version = "1.8.2",
-)
-
-bazel_dep(name = "platforms", version = "0.0.9")
-single_version_override(
-    module_name = "platforms",
-    version = "1.0.0",
-)
-
+bazel_dep(name = "bazel_skylib", version = "1.8.2")
+bazel_dep(name = "platforms", version = "1.0.0")
 bazel_dep(name = "rules_cc", version = "0.2.16")
-
-bazel_dep(name = "rules_java", version = "7.6.0")
-single_version_override(
-    module_name = "rules_java",
-    version = "9.3.0",
-)
-
+bazel_dep(name = "rules_java", version = "9.3.0")
 bazel_dep(name = "protobuf", version = "33.4")
+
 
 bazel_dep(
     name = "rules_scala",
