@@ -23,15 +23,25 @@ local_path_override(
 
 bazel_dep(name = "toolchains_llvm_bootstrapped", version = "0.5.4")
 
+register_toolchains(
+    "@toolchains_llvm_bootstrapped//toolchain:all",
+)
+
 ########################## Configure Scala ####################################
 scala_config = use_extension(
     "@rules_scala//scala/extensions:config.bzl",
     "scala_config",
 )
 scala_config.settings(scala_version = "3.8.1")
+use_repo(scala_config, "rules_scala_config")
 
 scala_deps = use_extension(
     "@rules_scala//scala/extensions:deps.bzl",
     "scala_deps",
 )
 scala_deps.scala()
+use_repo(scala_deps, "rules_scala_toolchains")
+
+register_toolchains(
+    "@rules_scala_toolchains//...:all",
+)

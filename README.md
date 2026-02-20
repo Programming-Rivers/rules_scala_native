@@ -22,9 +22,14 @@ This project provides two main rules:
 module(name = "my_scala_native_app")
 
 bazel_dep(name = "protobuf", version = "33.4")
-bazel_dep(name = "rules_scala", version = "7.2.1")
+bazel_dep(name = "rules_scala", version = "7.2.2")
 bazel_dep(name = "rules_scala_native", version = "0.1.0")
 bazel_dep(name = "toolchains_llvm_bootstrapped", version = "0.5.4")
+
+# Register hermetic C++ toolchain (clang/lld) for native linking
+register_toolchains(
+    "@toolchains_llvm_bootstrapped//toolchain:all",
+)
 
 # Configure Scala
 scala_config = use_extension(
@@ -32,12 +37,18 @@ scala_config = use_extension(
     "scala_config",
 )
 scala_config.settings(scala_version = "3.8.1")
+use_repo(scala_config, "rules_scala_config")
 
 scala_deps = use_extension(
     "@rules_scala//scala/extensions:deps.bzl",
     "scala_deps",
 )
 scala_deps.scala()
+use_repo(scala_deps, "rules_scala_toolchains")
+
+register_toolchains(
+    "@rules_scala_toolchains//...:all",
+)
 ```
 
 ### 2. Configure `.bazelrc`
@@ -103,7 +114,7 @@ Scala sources  →  scalac + nscplugin  →  .class + .nir files  →  Scala Nat
 | Component | Description |
 |-----------|-------------|
 | `scala_native_toolchain` | Manages Scala Native dependencies (nscplugin, runtime libs, linker) |
-| `phase_native_compile` | Injects the nscplugin compiler plugin for NIR generation |
+| `scala_native_library` macro | Injects the nscplugin compiler plugin for NIR generation |
 | `NativeLinker` | Bridges the Scala Native build API with Bazel's action graph |
 
 ### Dependencies
