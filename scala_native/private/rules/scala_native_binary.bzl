@@ -1,6 +1,5 @@
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl",
   "find_cpp_toolchain",
-  "use_cpp_toolchain",
 )
 load(
     "@rules_cc//cc:defs.bzl",
@@ -10,10 +9,7 @@ load(
   "@rules_java//java/common:java_info.bzl",
   "JavaInfo",
 )
-load(
-    "@rules_scala//scala/private:common.bzl",
-    "collect_jars",
-)
+
 load(
     "@rules_scala//scala:scala_cross_version.bzl",
     "scala_version_transition",
