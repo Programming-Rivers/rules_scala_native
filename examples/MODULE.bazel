@@ -21,6 +21,10 @@ bazel_dep(
     version = "0.1.0",
 )
 bazel_dep(
+    name = "rules_rust",
+    version = "0.68.1",
+)
+bazel_dep(
     name = "rules_zig",
     version = "0.12.3",
 )
@@ -35,7 +39,7 @@ local_path_override(
     path = "..",
 )
 
-bazel_dep(name = "toolchains_llvm_bootstrapped", version = "0.5.4")
+bazel_dep(name = "toolchains_llvm_bootstrapped", version = "0.5.9")
 
 register_toolchains(
     "@toolchains_llvm_bootstrapped//toolchain:all",
@@ -46,6 +50,14 @@ zig.toolchain(zig_version = "0.14.1")
 use_repo(zig, "zig_toolchains")
 
 register_toolchains("@zig_toolchains//:all")
+
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = "2024",
+    versions = ["1.93.0"],
+)
+use_repo(rust, "rust_toolchains")
+register_toolchains("@rust_toolchains//:all")
 
 ########################## Configure Scala ####################################
 scala_config = use_extension(

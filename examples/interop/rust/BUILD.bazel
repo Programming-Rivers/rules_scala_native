@@ -1,0 +1,23 @@
+load("@rules_scala_native//scala_native:scala_native_library.bzl", "scala_native_library")
+load("@rules_scala_native//scala_native:scala_native_binary.bzl", "scala_native_binary")
+load("@rules_rust//rust:defs.bzl", "rust_static_library")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+rust_static_library(
+    name = "rust_adder",
+    srcs = ["rust_adder.rs"],
+)
+
+scala_native_library(
+    name = "rust_interop_scala",
+    srcs = ["RustInterop.scala"],
+)
+
+scala_native_binary(
+    name = "rust_interop_bin",
+    main_class = "examples.interop.rust.RustInteropExample",
+    deps = [
+        ":rust_interop_scala",
+        ":rust_adder",
+    ],
+)
