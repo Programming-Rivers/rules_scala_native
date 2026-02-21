@@ -8,6 +8,6 @@ object CGreetings {
 }
 
 @main
-def sayHello(name: String): Unit =
-    println(s"Hello from Scala Native to $name")
+def sayHello: Unit =
+    println(s"Hello from Scala Native to the World!")
     CGreetings.c_greeting_function()
