@@ -12,7 +12,7 @@ This project provides two main rules:
 - **Bazel 9+** (bzlmod only, no WORKSPACE support)
 - **Scala 3.8.1**
 - **Scala Native 0.5.10**
-- **Linux x86_64** (currently tested platform)
+- **Linux, macOS** (x86_64, aarch64)
 
 ## Quick Start
 
@@ -100,6 +100,25 @@ Hello from Scala Native to the World
 Hello from a C function!
 ```
 
+## Cross-Compilation Support
+
+`rules_scala_native` supports hermetic cross-compilation by bridging Bazel's C++ toolchain infrastructure with the Scala Native linking pipeline. This ensures that target triples, sysroots, and standard library configurations are correctly applied.
+
+### Support Matrix
+
+| Platform    | Architectures  | C Library / Toolchain   | Build        | Execution     |
+| :---------- | :------------- | :---------------------- | :----------- | :------------ |
+| Linux       | aarch64        | glibc (2.28—2.42), musl | ✅ Succeeded | ❓ Not tested |
+| Linux       | x86_64         | glibc (2.28—2.42), musl | ✅ Succeeded | ✅ Succeeded  |
+| macOS       | aarch64        | Native Apple SDK        | ✅ Succeeded | ✅ Succeeded  |
+| macOS       | x86_64         | Native Apple SDK        | ✅ Succeeded | ❓ Not tested |
+| Windows     | aarch64        | -                       | ❌ Failed    | -             |
+| Windows     | x86_64         | -                       | ❌ Failed    | -             |
+| WebAssembly | wasm32         | -                       | ❌ Failed    | -             |
+| WebAssembly | wasm64         | -                       | ❌ Failed    | -             |
+
+> **Note:** Cross-compilation has been verified from a Linux x86_64 host to a total of 72 targets, including multiple architectures and glibc versions 2.28 through 2.42.
+
 ## Architecture
 
 ### Build Pipeline
@@ -129,8 +148,7 @@ This project depends on:
 
 - Only Scala 3.8.1 is supported
 - Only Scala Native 0.5.10 is supported
-- Only tested on Linux x86_64
-- Linking Scala Native binaries with C libraries is not yet tested
+- Windows and WebAssembly support is currently work-in-progress.
 
 ## Related
 
