@@ -1,0 +1,26 @@
+load("@rules_scala_native//scala_native:scala_native_library.bzl", "scala_native_library")
+load("@rules_scala_native//scala_native:scala_native_binary.bzl", "scala_native_binary")
+load("@rules_zig//zig:defs.bzl", "zig_static_library")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+# Let's try zig_static_library
+zig_static_library(
+    name = "zig_adder",
+    main = "zig_adder.zig",
+    zigopts = ["-fPIC"],
+    compiler_runtime = "include",
+)
+
+scala_native_library(
+    name = "zig_interop_scala",
+    srcs = ["ZigInterop.scala"],
+)
+
+scala_native_binary(
+    name = "zig_interop_bin",
+    main_class = "examples.interop.zig.ZigInteropExample",
+    deps = [
+        ":zig_interop_scala",
+        ":zig_adder",
+    ],
+)

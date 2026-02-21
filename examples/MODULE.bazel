@@ -20,6 +20,15 @@ bazel_dep(
     name = "rules_scala_native",
     version = "0.1.0",
 )
+bazel_dep(
+    name = "rules_zig",
+    version = "0.12.3",
+)
+bazel_dep(
+    name = "gazelle",
+    version = "0.38.0",
+    repo_name = "bazel_gazelle",
+)
 local_path_override(
     module_name = "rules_scala_native",
     path = "..",
@@ -30,6 +39,11 @@ bazel_dep(name = "toolchains_llvm_bootstrapped", version = "0.5.4")
 register_toolchains(
     "@toolchains_llvm_bootstrapped//toolchain:all",
 )
+
+zig = use_extension("@rules_zig//zig:extensions.bzl", "zig")
+zig.toolchain(zig_version = "0.14.1")
+use_repo(zig, "zig_toolchains")
+register_toolchains("@zig_toolchains//:all")
 
 ########################## Configure Scala ####################################
 scala_config = use_extension(
