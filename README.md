@@ -6,6 +6,7 @@ This project provides two main rules:
 
 - **`scala_native_library`** — compiles Scala sources to class files, tasty files, and NIR (Native Intermediate Representation).
 - **`scala_native_binary`** — links NIR files into a native executable using a hermetic C++ toolchain (clang/lld).
+- **`scala_native_test`** — a test rule for running Scala Native JUnit tests.
 
 ## Requirements
 
@@ -70,11 +71,25 @@ def sayHello(name: String): Unit =
     println(s"Hello from Scala Native to $name")
 ```
 
+```scala
+// NativeTest.scala
+package examples.native
+
+import org.junit.Test
+import org.junit.Assert.*
+
+class NativeTest:
+  @Test
+  def testMath(): Unit =
+    assertEquals("Basic arithmetic should work", 4, 2 + 2)
+```
+
 ### 4. Define build targets
 
 ```python
 load("@rules_scala_native//scala_native:scala_native_library.bzl", "scala_native_library")
 load("@rules_scala_native//scala_native:scala_native_binary.bzl", "scala_native_binary")
+load("@rules_scala_native//scala_native:scala_native_test.bzl", "scala_native_test")
 
 scala_native_library(
     name = "hello_native",
@@ -84,6 +99,12 @@ scala_native_library(
 scala_native_binary(
     name = "hello_native_bin",
     main_class = "examples.native.sayHello",
+    deps = [":hello_native"],
+)
+
+scala_native_test(
+    name = "hello_native_test",
+    srcs = ["NativeTest.scala"],
     deps = [":hello_native"],
 )
 ```
@@ -98,6 +119,11 @@ It should print this output:
 ```
 Hello from Scala Native to the World
 Hello from a C function!
+```
+
+To run tests:
+```bash
+$ bazel test //:hello_native_test
 ```
 
 ## Cross-Compilation Support
@@ -135,6 +161,7 @@ Scala sources  →  scalac + nscplugin  →  .class + .nir files  →  Scala Nat
 |-----------|-------------|
 | `scala_native_toolchain` | Manages Scala Native dependencies (nscplugin, runtime libs, linker) |
 | `scala_native_library` macro | Injects the nscplugin compiler plugin for NIR generation |
+| `scala_native_test` | Runs Scala Native JUnit tests |
 | `NativeLinker` | Bridges the Scala Native build API with Bazel's action graph |
 
 ### Dependencies
