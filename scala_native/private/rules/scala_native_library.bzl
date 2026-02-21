@@ -168,7 +168,7 @@ _scala_native_library_attrs.update(extras_phases([]))
 
 
 
-_scala_native_library_rule = rule(
+_scala_native_base_library = rule(
     attrs = _scala_native_library_attrs,
     fragments = ["java"],
     outputs = common_outputs,
@@ -194,7 +194,7 @@ def scala_native_library(name, plugins = [], **kwargs):
             included automatically.
         **kwargs: All other arguments are passed to the underlying rule.
     """
-    _scala_native_library_rule(
+    _scala_native_base_library(
         name = name,
         plugins = plugins + [Label("@org_scala_native_nscplugin//jar")],
         **kwargs
