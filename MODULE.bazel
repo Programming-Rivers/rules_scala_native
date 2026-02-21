@@ -19,13 +19,10 @@ bazel_dep(name = "platforms", version = "1.0.0")
 bazel_dep(name = "rules_cc", version = "0.2.16")
 bazel_dep(name = "rules_java", version = "9.3.0")
 bazel_dep(name = "protobuf", version = "33.4")
-
-
 bazel_dep(
     name = "rules_scala",
     version = "7.2.2",
 )
-
 bazel_dep(name = "toolchains_llvm_bootstrapped", version = "0.3.1")
 
 register_toolchains(
@@ -45,7 +42,6 @@ scala_deps = use_extension(
     "scala_deps",
 )
 scala_deps.scala()
-
 use_repo(
     scala_deps,
     "rules_scala_toolchains",
@@ -57,7 +53,6 @@ scala_native_deps = use_extension(
     "scala_native_deps",
 )
 scala_native_deps.toolchain(scala_native_version = "0.5.10")
-
 use_repo(
     scala_native_deps,
     "org_junit_junit",
