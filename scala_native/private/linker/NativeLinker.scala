@@ -38,6 +38,7 @@ object NativeLinker {
     moduleName: String,
     clang: Path,
     clangPP: Path,
+    compileOptions: Seq[String],
     linkingOptions: Seq[String],
     gc: GC,
     mode: Mode,
@@ -88,6 +89,7 @@ object NativeLinker {
     var moduleName: String = "main"
     var clang: String = null
     var clangPP: String = null
+    var compileOptions: Seq[String] = Seq.empty
     var linkingOptions: Seq[String] = Seq.empty
     var gc: GC = GC.immix
     var mode: Mode = Mode.debug
@@ -120,6 +122,9 @@ object NativeLinker {
           i += 2
         case "--clang++" =>
           clangPP = args(i + 1)
+          i += 2
+        case "--compile_option" =>
+          compileOptions = compileOptions :+ args(i + 1)
           i += 2
         case "--linking_option" =>
           linkingOptions = linkingOptions :+ args(i + 1)
@@ -162,6 +167,7 @@ object NativeLinker {
       moduleName = moduleName,
       clang = Paths.get(clang).toAbsolutePath(),
       clangPP = Paths.get(clangPP).toAbsolutePath(),
+      compileOptions = compileOptions,
       linkingOptions = linkingOptions,
       gc = gc,
       mode = mode,
@@ -175,6 +181,17 @@ object NativeLinker {
     Files.createDirectories(opts.outputDir)
     Files.createDirectories(opts.workDir)
 
+    val execRoot = Paths.get("").toAbsolutePath()
+    def makeAbsolute(optsSeq: Seq[String]): Seq[String] = optsSeq.map { opt =>
+      if (!opt.startsWith("-") && !opt.startsWith("/") && execRoot.resolve(opt).toFile.exists()) {
+        execRoot.resolve(opt).toString
+      } else if (opt.startsWith("--sysroot=") && !opt.substring(10).startsWith("/") && execRoot.resolve(opt.substring(10)).toFile.exists()) {
+        "--sysroot=" + execRoot.resolve(opt.substring(10)).toString
+      } else {
+        opt
+      }
+    }
+
     val nativeConfig = NativeConfig.empty
       .withClang(opts.clang)
       .withClangPP(opts.clangPP)
@@ -183,8 +200,8 @@ object NativeLinker {
       .withLTO(opts.lto)
       .withBuildTarget(opts.buildTarget)
       .withLinkStubs(true)
-      .withLinkingOptions(Discover.linkingOptions() ++ opts.linkingOptions)
-      .withCompileOptions(Discover.compileOptions())
+      .withLinkingOptions(Discover.linkingOptions() ++ makeAbsolute(opts.linkingOptions))
+      .withCompileOptions(Discover.compileOptions() ++ makeAbsolute(opts.compileOptions))
       .withCppOptions(Seq("-std=c++17"))
       .withCOptions(Seq("-std=c17"))
 

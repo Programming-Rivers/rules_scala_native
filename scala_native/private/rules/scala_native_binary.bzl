@@ -46,6 +46,30 @@ def _scala_native_binary_impl(ctx):
         action_name = "c++-compile",
     )
 
+    c_compile_variables = cc_common.create_compile_variables(
+        feature_configuration = feature_configuration,
+        cc_toolchain = cc_toolchain,
+        user_compile_flags = ctx.fragments.cpp.copts + ctx.fragments.cpp.conlyopts,
+    )
+    c_compile_options = cc_common.get_memory_inefficient_command_line(
+        feature_configuration = feature_configuration,
+        action_name = "c-compile",
+        variables = c_compile_variables,
+    )
+    # We filter out any options that might be specific to source compilation, though usually it's just flags
+    # We will pass these flags to the Scala Native linker so it configures clang correctly.
+
+    link_variables = cc_common.create_link_variables(
+        feature_configuration = feature_configuration,
+        cc_toolchain = cc_toolchain,
+        is_linking_dynamic_library = False,
+    )
+    link_options = cc_common.get_memory_inefficient_command_line(
+        feature_configuration = feature_configuration,
+        action_name = "c++-link-executable",
+        variables = link_variables,
+    )
+
     # Collect native lib jars and user deps using java_common.merge
     all_java_deps = [
         scala_native_toolchain.nativelib,
@@ -82,6 +106,10 @@ def _scala_native_binary_impl(ctx):
     args.add("--lto", ctx.attr.lto)
     # Flatten the classpath elements into a single string with the path separator
     args.add_joined("--cp", classpath, join_with=ctx.configuration.host_path_separator)
+    for opt in c_compile_options:
+        args.add("--compile_option", opt)
+    for opt in link_options:
+        args.add("--linking_option", opt)
 
     ctx.actions.run(
         outputs = [native_lib],
