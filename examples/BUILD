@@ -16,13 +16,13 @@ load(
 
 scala_native_library(
     name = "greetings",
-    srcs = ["Greetings.scala"],
+    srcs = ["basic/Greetings.scala"],
 )
 
 scala_native_library(
     name = "hello_native",
     srcs = [
-        "HelloNative.scala",
+        "basic/HelloNative.scala",
     ],
     deps = [
         ":greetings",
@@ -32,13 +32,13 @@ scala_native_library(
 scala_native_library(
     name = "intrinsics",
     srcs = [
-        "Intrinsics.scala",
+        "features/Intrinsics.scala",
     ],
 )
 
 cc_library(
     name = "c_greetings",
-    srcs = ["c_greetings.c"],
+    srcs = ["basic/c_greetings.c"],
 )
 
 scala_native_binary(
