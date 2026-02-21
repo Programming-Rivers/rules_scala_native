@@ -13,6 +13,10 @@ bazel_dep(
     version = "7.2.2",
 )
 bazel_dep(
+    name = "rules_cc",
+    version = "0.2.16",
+)
+bazel_dep(
     name = "rules_scala_native",
     version = "0.1.0",
 )
@@ -41,6 +45,10 @@ scala_deps = use_extension(
 )
 scala_deps.scala()
 use_repo(scala_deps, "rules_scala_toolchains")
+scala_native_deps = use_extension(
+    "//scala_native/extensions:deps.bzl",
+    "scala_native_deps",
+)
 
 register_toolchains(
     "@rules_scala_toolchains//...:all",

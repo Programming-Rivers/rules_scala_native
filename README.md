@@ -96,7 +96,8 @@ $ bazel run //:hello_native_bin -- "the World!"
 
 It should print this output:
 ```
-Hello from Scala Native to the World!
+Hello from Scala Native to the World
+Hello from a C function!
 ```
 
 ## Architecture
