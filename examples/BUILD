@@ -68,3 +68,22 @@ scala_native_binary(
         ":advanced_c_lib",
     ],
 )
+
+cc_library(
+    name = "cpp_greeter_lib",
+    srcs = ["interop/cpp/cpp_greeter.cpp"],
+)
+
+scala_native_library(
+    name = "cpp_interop_scala",
+    srcs = ["interop/cpp/CppInterop.scala"],
+)
+
+scala_native_binary(
+    name = "cpp_interop_bin",
+    main_class = "examples.interop.cpp.cppInteropExample",
+    deps = [
+        ":cpp_interop_scala",
+        ":cpp_greeter_lib",
+    ],
+)
