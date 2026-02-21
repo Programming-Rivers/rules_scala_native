@@ -145,6 +145,159 @@ $ bazel test //:hello_native_test
 
 > **Note:** Cross-compilation has been verified from a Linux x86_64 host to a total of 72 targets, including multiple architectures and glibc versions 2.28 through 2.42.
 
+## Interoperability with Other Languages
+
+`rules_scala_native` makes it easy to interoperate with other native languages by leveraging Bazel's dependency system. Since `scala_native_binary` links against the hermetic C++ toolchain, it can seamlessly link with static libraries produced by `cc_library`, `rust_static_library`, `zig_static_library`, and more.
+
+### C Interop
+
+You can link directly with C code using `cc_library`.
+
+**C Code:**
+```c
+// math_utils.c
+int add(int a, int b) {
+    return a + b;
+}
+```
+
+**Scala Definition:**
+```scala
+@extern
+object MathUtils:
+    def add(a: CInt, b: CInt): CInt = extern
+```
+
+**BUILD.bazel:**
+```python
+cc_library(
+    name = "math_utils",
+    srcs = ["math_utils.c"],
+)
+
+scala_native_binary(
+    name = "app",
+    deps = [":math_utils", ...],
+    ...
+)
+```
+
+### Rust Interop
+
+Interoperate with Rust by using `rules_rust` to create a `rust_static_library` with `extern "C"` functions.
+
+**Rust Code:**
+```rust
+#[no_mangle]
+pub extern "C" fn rust_add(a: i32, b: i32) -> i32 {
+    a + b
+}
+```
+
+**Scala Definition:**
+```scala
+@extern
+object RustLib:
+    @name("rust_add")
+    def add(a: CInt, b: CInt): CInt = extern
+
+```
+
+**BUILD.bazel:**
+```python
+rust_static_library(
+    name = "rust_lib",
+    srcs = ["lib.rs"],
+)
+
+scala_native_binary(
+    name = "app",
+    deps = [":rust_lib", ...],
+    ...
+)
+```
+
+### Zig Interop
+
+Similarly, you can use `rules_zig` to link with Zig code.
+
+**Zig Code:**
+```zig
+export fn zig_add(a: i32, b: i32) i32 {
+    return a + b;
+}
+```
+
+**Scala Definition:**
+```scala
+@extern
+object ZigLib:
+    @name("zig_add")
+    def add(a: CInt, b: CInt): CInt = extern
+```
+
+**BUILD.bazel:**
+```python
+zig_static_library(
+    name = "zig_lib",
+    main = "lib.zig",
+)
+
+scala_native_binary(
+    name = "app",
+    deps = [":zig_lib", ...],
+    ...
+)
+```
+
+### C++ Interop
+
+C++ interop is supported by wrapping C++ functionality in `extern "C"` blocks to ensure stable ABI linkage.
+
+**C++ Code:**
+```cpp
+// greeter.cpp
+#include <iostream>
+#include <string>
+
+class Greeter {
+public:
+    Greeter(const std::string& name) : name_(name) {}
+    void greet() { std::cout << "Hello, " << name_ << "!" << std::endl; }
+private:
+    std::string name_;
+};
+
+extern "C" {
+    void* greeter_new(const char* name) { return new Greeter(name); }
+    void greeter_greet(void* g) { static_cast<Greeter*>(g)->greet(); }
+    void greeter_delete(void* g) { delete static_cast<Greeter*>(g); }
+}
+```
+
+**Scala Definition:**
+```scala
+@extern
+object CppGreeter:
+    def greeter_new(name: CString): Ptr[Byte] = extern
+    def greeter_greet(greeter: Ptr[Byte]): Unit = extern
+    def greeter_delete(greeter: Ptr[Byte]): Unit = extern
+```
+
+**BUILD.bazel:**
+```python
+cc_library(
+    name = "cpp_greeter",
+    srcs = ["greeter.cpp"],
+)
+
+scala_native_binary(
+    name = "app",
+    deps = [":cpp_greeter", ...],
+    ...
+)
+```
+
 ## Architecture
 
 ### Build Pipeline
