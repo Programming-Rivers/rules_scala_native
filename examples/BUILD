@@ -49,3 +49,22 @@ scala_native_binary(
         ":c_greetings",
     ],
 )
+
+cc_library(
+    name = "advanced_c_lib",
+    srcs = ["interop/c/advanced_c.c"],
+)
+
+scala_native_library(
+    name = "advanced_c_scala",
+    srcs = ["interop/c/AdvancedC.scala"],
+)
+
+scala_native_binary(
+    name = "advanced_c_bin",
+    main_class = "examples.interop.c.advancedCExample",
+    deps = [
+        ":advanced_c_scala",
+        ":advanced_c_lib",
+    ],
+)
