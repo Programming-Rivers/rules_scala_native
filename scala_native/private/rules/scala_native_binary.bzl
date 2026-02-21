@@ -174,3 +174,15 @@ scala_native_binary = rule(
     fragments = ["cpp"],
     cfg = scala_version_transition,
 )
+
+scala_native_internal_test = rule(
+    implementation = _scala_native_binary_impl,
+    attrs = _scala_native_binary_attrs,
+    test = True,
+    toolchains = [
+        "//scala_native:toolchain_type", 
+        "@bazel_tools//tools/cpp:toolchain_type"
+    ],
+    fragments = ["cpp"],
+    cfg = scala_version_transition,
+)

@@ -78,6 +78,24 @@ scala_native_deps = use_extension(
     "@rules_scala_native//scala_native/extensions:deps.bzl",
     "scala_native_deps",
 )
+use_repo(
+    scala_native_deps,
+    "org_junit_junit",
+    "org_scala_native_auxlib",
+    "org_scala_native_clib",
+    "org_scala_native_javalib",
+    "org_scala_native_junit_plugin",
+    "org_scala_native_junit_runtime",
+    "org_scala_native_nativelib",
+    "org_scala_native_nir",
+    "org_scala_native_nscplugin",
+    "org_scala_native_posixlib",
+    "org_scala_native_scalalib",
+    "org_scala_native_test_interface",
+    "org_scala_native_test_interface_sbt_defs",
+    "org_scala_native_tools",
+    "org_scala_native_util",
+)
 
 register_toolchains(
     "@rules_scala_toolchains//...:all",

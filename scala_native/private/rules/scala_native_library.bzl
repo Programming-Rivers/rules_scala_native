@@ -196,6 +196,9 @@ def scala_native_library(name, plugins = [], **kwargs):
     """
     _scala_native_base_library(
         name = name,
-        plugins = plugins + [Label("@org_scala_native_nscplugin//jar")],
+        plugins = plugins + [
+            Label("@org_scala_native_nscplugin//jar"),
+            Label("@org_scala_native_junit_plugin//jar"),
+        ],
         **kwargs
     )

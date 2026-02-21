@@ -59,6 +59,7 @@ use_repo(
     "org_scala_native_auxlib",
     "org_scala_native_clib",
     "org_scala_native_javalib",
+    "org_scala_native_junit_plugin",
     "org_scala_native_junit_runtime",
     "org_scala_native_nativelib",
     "org_scala_native_nir",
