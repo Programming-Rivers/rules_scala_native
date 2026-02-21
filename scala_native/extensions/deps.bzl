@@ -18,13 +18,14 @@ load(
     "default_maven_server_urls",
 )
 
-# Scala Native 0.5.10 artifacts for Scala 3.8.1
+# Scala Native artifacts by version
 #
 # Cross-extension deps (those starting with @io_bazel_rules_scala_) are
 # stripped because they are created by the separate scala_deps extension
 # and are not visible to repos created by this extension under bzlmod.
 # Intra-extension deps (those starting with @org_scala_native_) are kept.
 _SCALA_NATIVE_ARTIFACTS = {
+    "0.5.10": {
     "org_junit_junit": {
         "artifact": "junit:junit:4.12",
         "sha256": "59721f0805e223d84b90677887d9ff567dc534d7c502ca903c0c2b17f05c116a",
@@ -106,12 +107,36 @@ _SCALA_NATIVE_ARTIFACTS = {
             "@org_junit_junit",
         ],
     },
+    },
 }
+
+_toolchain_tag = tag_class(
+    attrs = {
+        "scala_native_version": attr.string(
+            default = "0.5.10",
+            doc = "The version of Scala Native to use. Default is 0.5.10.",
+        ),
+    },
+)
 
 def _scala_native_deps_impl(module_ctx):
     maven_servers = default_maven_server_urls()
 
-    for name, artifact_info in _SCALA_NATIVE_ARTIFACTS.items():
+    scala_native_version = "0.5.10"
+    for mod in module_ctx.modules:
+        for toolchain in mod.tags.toolchain:
+            # Last one wins for now
+            scala_native_version = toolchain.scala_native_version
+
+    if scala_native_version not in _SCALA_NATIVE_ARTIFACTS:
+        fail("Unsupported Scala Native version: {}. Supported versions: {}".format(
+            scala_native_version,
+            _SCALA_NATIVE_ARTIFACTS.keys(),
+        ))
+
+    artifacts = _SCALA_NATIVE_ARTIFACTS[scala_native_version]
+
+    for name, artifact_info in artifacts.items():
         scala_maven_import_external(
             name = name,
             artifact = artifact_info["artifact"],
@@ -128,11 +153,11 @@ def _scala_native_deps_impl(module_ctx):
 
 scala_native_deps = module_extension(
     implementation = _scala_native_deps_impl,
-    tag_classes = {},
+    tag_classes = {"toolchain": _toolchain_tag},
     doc = """Downloads Scala Native Maven artifacts.
 
 This extension downloads all the Scala Native jars needed by the
-rules_scala_native rulesets. The artifacts are pinned to specific
-versions of Scala Native (0.5.10) and Scala (3.8.1).
+rules_scala_native rulesets. The artifacts are parameterized by
+the `scala_native_version` tag attribute.
 """,
 )

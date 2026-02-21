@@ -56,6 +56,7 @@ scala_native_deps = use_extension(
     "//scala_native/extensions:deps.bzl",
     "scala_native_deps",
 )
+scala_native_deps.toolchain(scala_native_version = "0.5.10")
 
 use_repo(
     scala_native_deps,

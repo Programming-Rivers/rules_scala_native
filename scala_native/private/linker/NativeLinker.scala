@@ -31,6 +31,7 @@ object NativeLinker {
 
   case class LinkerOpts(
     mainClass: String,
+    outpath: Path,
     outputDir: Path,
     classpath: Seq[Path],
     workDir: Path,
@@ -41,6 +42,7 @@ object NativeLinker {
     gc: GC,
     mode: Mode,
     lto: LTO,
+    buildTarget: BuildTarget,
   )
 
   private def parseGC(value: String): GC = value match {
@@ -69,8 +71,17 @@ object NativeLinker {
       s"Unknown LTO: '$other'. Valid values: none, thin, full")
   }
 
+  private def parseBuildTarget(value: String): BuildTarget = value match {
+    case "application" => BuildTarget.application
+    case "libraryStatic" => BuildTarget.libraryStatic
+    case "libraryDynamic" => BuildTarget.libraryDynamic
+    case other => throw new IllegalArgumentException(
+      s"Unknown build target: '$other'. Valid values: application, libraryStatic, libraryDynamic")
+  }
+
   def parseArgs(args: Array[String]): LinkerOpts = {
     var mainClass: String = null
+    var outpath: Path = null
     var outputDir: Path = null
     var classpath: Seq[Path] = Seq.empty
     var workDir: Path = Paths.get(".")
@@ -81,6 +92,7 @@ object NativeLinker {
     var gc: GC = GC.immix
     var mode: Mode = Mode.debug
     var lto: LTO = LTO.none
+    var buildTarget: BuildTarget = BuildTarget.application
 
     var i = 0
     while (i < args.length) {
@@ -88,14 +100,17 @@ object NativeLinker {
         case "--main" =>
           mainClass = args(i + 1)
           i += 2
+        case "--outpath" =>
+          outpath = Paths.get(args(i + 1)).toAbsolutePath()
+          i += 2
         case "--output" =>
-          outputDir = Paths.get(args(i + 1))
+          outputDir = Paths.get(args(i + 1)).toAbsolutePath()
           i += 2
         case "--cp" =>
-          classpath = args(i + 1).split(File.pathSeparator).map(Paths.get(_)).toSeq
+          classpath = args(i + 1).split(File.pathSeparator).map(Paths.get(_).toAbsolutePath()).toSeq
           i += 2
         case "--workdir" =>
-          workDir = Paths.get(args(i + 1))
+          workDir = Paths.get(args(i + 1)).toAbsolutePath()
           i += 2
         case "--module_name" =>
           moduleName = args(i + 1)
@@ -118,14 +133,17 @@ object NativeLinker {
         case "--lto" =>
           lto = parseLTO(args(i + 1))
           i += 2
+        case "--build_target" =>
+          buildTarget = parseBuildTarget(args(i + 1))
+          i += 2
         case other =>
           throw new IllegalArgumentException(s"Unknown argument: $other")
       }
     }
 
-    if (mainClass == null || outputDir == null) {
+    if (mainClass == null || outpath == null || outputDir == null) {
       throw new IllegalArgumentException(
-        "Missing required arguments. Usage: --main <class> --output <dir> --cp <classpath> [--workdir <dir>] [--module_name <name>] [--clang <path>] [--clang++ <path>] [--gc <gc>] [--mode <mode>] [--lto <lto>]"
+        "Missing required arguments. Usage: --main <class> --outpath <file> --output <dir> --cp <classpath> [--workdir <dir>] [--module_name <name>] [--clang <path>] [--clang++ <path>] [--gc <gc>] [--mode <mode>] [--lto <lto>]"
       )
     }
 
@@ -137,16 +155,18 @@ object NativeLinker {
 
     LinkerOpts(
       mainClass = mainClass,
+      outpath = outpath,
       outputDir = outputDir,
       classpath = classpath,
       workDir = workDir,
       moduleName = moduleName,
-      clang = Paths.get(clang),
-      clangPP = Paths.get(clangPP),
+      clang = Paths.get(clang).toAbsolutePath(),
+      clangPP = Paths.get(clangPP).toAbsolutePath(),
       linkingOptions = linkingOptions,
       gc = gc,
       mode = mode,
       lto = lto,
+      buildTarget = buildTarget,
     )
   }
 
@@ -161,6 +181,7 @@ object NativeLinker {
       .withGC(opts.gc)
       .withMode(opts.mode)
       .withLTO(opts.lto)
+      .withBuildTarget(opts.buildTarget)
       .withLinkStubs(true)
       .withLinkingOptions(Discover.linkingOptions() ++ opts.linkingOptions)
       .withCompileOptions(Discover.compileOptions())
@@ -183,7 +204,9 @@ object NativeLinker {
         ExecutionContext.fromExecutorService(
           java.util.concurrent.Executors.newFixedThreadPool(nThreads)
         )
-      Build.buildCachedAwait(config)
+      val out = Build.buildCachedAwait(config)
+      Files.copy(out, opts.outpath, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+      opts.outpath
     }
   }
 }

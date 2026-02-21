@@ -4,10 +4,15 @@ load("@bazel_tools//tools/cpp:toolchain_utils.bzl",
 load(
     "@rules_cc//cc:defs.bzl",
     "cc_common",
+    "CcInfo",
 )
 load(
   "@rules_java//java/common:java_info.bzl",
   "JavaInfo",
+)
+load(
+    "@rules_java//java/common:java_common.bzl",
+    "java_common",
 )
 
 load(
@@ -41,45 +46,37 @@ def _scala_native_binary_impl(ctx):
         action_name = "c++-compile",
     )
 
-    # Build the list of dependencies including Scala Native runtime libraries
-    # Collect native lib jars specifically
-    native_libs_jars = []
-    for lib in [
+    # Collect native lib jars and user deps using java_common.merge
+    all_java_deps = [
         scala_native_toolchain.nativelib,
         scala_native_toolchain.javalib,
         scala_native_toolchain.auxlib,
         scala_native_toolchain.scalalib,
-    ]:
-         if JavaInfo in lib:
-             # Use transitive jars to include scala-library etc. which are deps of scalalib
-             native_libs_jars.extend(lib[JavaInfo].transitive_runtime_jars.to_list())
+    ] + ctx.attr.deps
     
-    # Collect user deps
-    user_deps_jars = []
-    for dep in ctx.attr.deps:
-        if JavaInfo in dep:
-            user_deps_jars.append(dep[JavaInfo].transitive_runtime_jars)
-            
-    classpath = depset(direct = native_libs_jars, transitive = user_deps_jars, order = "preorder")
+    java_infos = [dep[JavaInfo] for dep in all_java_deps if JavaInfo in dep]
+    merged_java_info = java_common.merge(java_infos)
+    classpath = merged_java_info.transitive_runtime_jars
 
     
     main_class = ctx.attr.main_class
     module_name = ctx.label.name
     
-    output_executable = ctx.actions.declare_file(ctx.label.name)
-    output_dir = output_executable.dirname
+    native_lib = ctx.actions.declare_file("lib" + ctx.label.name + ".a")
+    output_dir = native_lib.dirname
     
     worker = scala_native_toolchain.linker_binary[DefaultInfo].files_to_run
     
     # Arguments
     args = ctx.actions.args()
     args.add("--main", main_class)
+    args.add("--outpath", native_lib)
     args.add("--output", output_dir)
     args.add("--module_name", module_name)
     args.add("--workdir", output_dir + "/_native_work")
     args.add("--clang", clang_path)
     args.add("--clang++", clang_pp_path)
-    args.add("--linking_option", "-fuse-ld=lld")
+    args.add("--build_target", "libraryStatic")
     args.add("--gc", ctx.attr.gc)
     args.add("--mode", ctx.attr.mode)
     args.add("--lto", ctx.attr.lto)
@@ -87,7 +84,7 @@ def _scala_native_binary_impl(ctx):
     args.add_joined("--cp", classpath, join_with=ctx.configuration.host_path_separator)
 
     ctx.actions.run(
-        outputs = [output_executable],
+        outputs = [native_lib],
         inputs = depset(transitive = [
             scala_native_toolchain.linker_binary[DefaultInfo].files,
             classpath,
@@ -96,9 +93,43 @@ def _scala_native_binary_impl(ctx):
         executable = worker, 
         arguments = [args],
         mnemonic = "ScalaNativeLink",
-        progress_message = "Linking %s" % module_name,
+        progress_message = "Generating native objects for %s" % module_name,
         toolchain = "//scala_native:toolchain_type",
+        env = {
+            "PATH": clang_path.rpartition("/")[0] + ":/usr/bin:/bin",
+        },
     )
+    
+    # Now use cc_common.link to produce the final executable
+    library_to_link = cc_common.create_library_to_link(
+        actions = ctx.actions,
+        feature_configuration = feature_configuration,
+        cc_toolchain = cc_toolchain,
+        static_library = native_lib,
+    )
+    linker_input = cc_common.create_linker_input(
+        owner = ctx.label,
+        libraries = depset([library_to_link]),
+    )
+    linking_context = cc_common.create_linking_context(
+        linker_inputs = depset([linker_input]),
+    )
+    
+    user_linking_contexts = []
+    for dep in ctx.attr.deps:
+        if CcInfo in dep:
+            user_linking_contexts.append(dep[CcInfo].linking_context)
+            
+    linking_outputs = cc_common.link(
+        actions = ctx.actions,
+        feature_configuration = feature_configuration,
+        cc_toolchain = cc_toolchain,
+        name = ctx.label.name,
+        linking_contexts = [linking_context] + user_linking_contexts,
+        user_link_flags = ["-pthread", "-ldl", "-lm"],
+    )
+
+    output_executable = linking_outputs.executable
     
     return [
         DefaultInfo(
@@ -109,7 +140,7 @@ def _scala_native_binary_impl(ctx):
 
 _scala_native_binary_attrs = {
     "main_class": attr.string(mandatory = True),
-    "deps": attr.label_list(providers = [JavaInfo]),
+    "deps": attr.label_list(),
     "gc": attr.string(
         default = "immix",
         values = ["immix", "commix", "boehm", "none"],
