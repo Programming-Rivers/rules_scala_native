@@ -87,3 +87,36 @@ scala_native_binary(
         ":cpp_greeter_lib",
     ],
 )
+
+scala_native_library(
+    name = "zone_alloc_scala",
+    srcs = ["features/ZoneAlloc.scala"],
+)
+
+scala_native_binary(
+    name = "zone_alloc_bin",
+    main_class = "examples.features.zoneAllocExample",
+    deps = [":zone_alloc_scala"],
+)
+
+scala_native_library(
+    name = "struct_scala",
+    srcs = ["features/Struct.scala"],
+)
+
+scala_native_binary(
+    name = "struct_bin",
+    main_class = "examples.features.structExample",
+    deps = [":struct_scala"],
+)
+
+scala_native_library(
+    name = "posix_scala",
+    srcs = ["features/Posix.scala"],
+)
+
+scala_native_binary(
+    name = "posix_bin",
+    main_class = "examples.features.posixExample",
+    deps = [":posix_scala"],
+)
