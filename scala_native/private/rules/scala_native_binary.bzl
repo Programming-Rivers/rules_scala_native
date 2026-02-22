@@ -46,6 +46,8 @@ def _scala_native_binary_impl(ctx):
         action_name = "c++-compile",
     )
 
+    target_triple = _get_target_triple(cc_toolchain)
+
     c_compile_variables = cc_common.create_compile_variables(
         feature_configuration = feature_configuration,
         cc_toolchain = cc_toolchain,
@@ -56,8 +58,36 @@ def _scala_native_binary_impl(ctx):
         action_name = "c-compile",
         variables = c_compile_variables,
     )
-    # We filter out any options that might be specific to source compilation, though usually it's just flags
-    # We will pass these flags to the Scala Native linker so it configures clang correctly.
+
+    # Extract C++ compile options (may include additional include paths for C++ headers like <exception>)
+    cpp_compile_variables = cc_common.create_compile_variables(
+        feature_configuration = feature_configuration,
+        cc_toolchain = cc_toolchain,
+        user_compile_flags = ctx.fragments.cpp.copts + ctx.fragments.cpp.cxxopts,
+    )
+    cpp_compile_options = cc_common.get_memory_inefficient_command_line(
+        feature_configuration = feature_configuration,
+        action_name = "c++-compile",
+        variables = cpp_compile_variables,
+    )
+    # Compute extra C++ options that are not already in the C compile options,
+    # being careful to preserve paired arguments like -isystem <path>.
+    c_opts_set = {opt: True for opt in c_compile_options}
+    extra_cpp_options = []
+    skip_next = False
+    for i in range(len(cpp_compile_options)):
+        if skip_next:
+            skip_next = False
+            continue
+        opt = cpp_compile_options[i]
+        if opt in ("-isystem", "-I", "-iquote") and i + 1 < len(cpp_compile_options):
+            val = cpp_compile_options[i+1]
+            if val not in c_opts_set:
+                extra_cpp_options.extend([opt, val])
+            skip_next = True
+        else:
+            if opt not in c_opts_set:
+                extra_cpp_options.append(opt)
 
     link_variables = cc_common.create_link_variables(
         feature_configuration = feature_configuration,
@@ -77,6 +107,10 @@ def _scala_native_binary_impl(ctx):
         scala_native_toolchain.auxlib,
         scala_native_toolchain.scalalib,
     ] + ctx.attr.deps
+
+    # Include windowslib when cross-compiling to Windows
+    if target_triple and "windows" in target_triple and scala_native_toolchain.windowslib:
+        all_java_deps = all_java_deps + [scala_native_toolchain.windowslib]
     
     java_infos = [dep[JavaInfo] for dep in all_java_deps if JavaInfo in dep]
     merged_java_info = java_common.merge(java_infos)
@@ -104,10 +138,14 @@ def _scala_native_binary_impl(ctx):
     args.add("--gc", ctx.attr.gc)
     args.add("--mode", ctx.attr.mode)
     args.add("--lto", ctx.attr.lto)
+    if target_triple:
+        args.add("--target_triple", target_triple)
     # Flatten the classpath elements into a single string with the path separator
     args.add_joined("--cp", classpath, join_with=ctx.configuration.host_path_separator)
     for opt in c_compile_options:
         args.add("--compile_option", opt)
+    for opt in extra_cpp_options:
+        args.add("--cpp_option", opt)
     for opt in link_options:
         args.add("--linking_option", opt)
 
@@ -148,13 +186,20 @@ def _scala_native_binary_impl(ctx):
         if CcInfo in dep:
             user_linking_contexts.append(dep[CcInfo].linking_context)
             
+    # Platform-specific link flags: POSIX systems need pthread, dl, m;
+    # Windows (MinGW) does not, but needs dbghelp, userenv, etc.
+    if target_triple and "windows" in target_triple:
+        platform_link_flags = ["-luserenv", "-ldbghelp", "-lws2_32", "-lbcrypt", "-lcrypt32"]
+    else:
+        platform_link_flags = ["-pthread", "-ldl", "-lm"]
+
     linking_outputs = cc_common.link(
         actions = ctx.actions,
         feature_configuration = feature_configuration,
         cc_toolchain = cc_toolchain,
         name = ctx.label.name,
         linking_contexts = [linking_context] + user_linking_contexts,
-        user_link_flags = ["-pthread", "-ldl", "-lm"],
+        user_link_flags = platform_link_flags,
     )
 
     output_executable = linking_outputs.executable
@@ -190,6 +235,28 @@ _scala_native_binary_attrs = {
 }
 
 _scala_native_binary_attrs.update(toolchain_transition_attr)
+
+# Map CC toolchain target_cpu values to LLVM target triples.
+# The CC toolchain's target_cpu reflects the platform constraint values.
+# Note: toolchains_llvm_bootstrapped uses "win64" for Windows x86_64.
+_TARGET_CPU_TO_TRIPLE = {
+    # Linux
+    "k8": None,  # Native x86_64 Linux — no cross-compilation needed
+    "aarch64": "aarch64-unknown-linux-gnu",
+    # macOS
+    "darwin_x86_64": "x86_64-apple-darwin",
+    "darwin_arm64": "aarch64-apple-darwin",
+    "darwin": "aarch64-apple-darwin",
+    # Windows (MinGW) — toolchains_llvm_bootstrapped uses "win64"
+    "x64_windows": "x86_64-w64-windows-gnu",
+    "win64": "x86_64-w64-windows-gnu",
+    "aarch64_windows": "aarch64-w64-windows-gnu",
+}
+
+def _get_target_triple(cc_toolchain):
+    """Derive the LLVM target triple from the CC toolchain's target CPU."""
+    target_cpu = cc_toolchain.cpu
+    return _TARGET_CPU_TO_TRIPLE.get(target_cpu, None)
 
 scala_native_binary = rule(
     implementation = _scala_native_binary_impl,

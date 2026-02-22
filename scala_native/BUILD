@@ -21,6 +21,7 @@ scala_native_toolchain(
     linker_binary = "//scala_native/private/linker:native_linker",
     test_interface = "@org_scala_native_test_interface//jar",
     junit_runtime = "@org_scala_native_junit_runtime//jar",
+    windowslib = "@org_scala_native_windowslib//jar",
     scala_native_version = "0.5.10",
     visibility = ["//visibility:public"],
 )

@@ -121,6 +121,13 @@ _SCALA_NATIVE_ARTIFACTS = {
             "sha256": "76524f752c64fc2e6e6aa2439e793c2d62fcdeb6398cd0011735ac0fefe06abf",
             "deps": [],
         },
+        "org_scala_native_windowslib": {
+            "artifact": "org.scala-native:windowslib_native0.5_3:0.5.10",
+            "sha256": "ccd54cae410b4701255fff6dec9668c39cfad3af3a9f704a9cb58295fff9d6aa",
+            "deps": [
+                "@org_scala_native_nativelib",
+            ],
+        },
     },
 }
 

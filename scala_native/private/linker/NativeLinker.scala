@@ -39,11 +39,13 @@ object NativeLinker {
     clang: Path,
     clangPP: Path,
     compileOptions: Seq[String],
+    cppOptions: Seq[String],
     linkingOptions: Seq[String],
     gc: GC,
     mode: Mode,
     lto: LTO,
     buildTarget: BuildTarget,
+    targetTriple: Option[String],
   )
 
   private def parseGC(value: String): GC = value match {
@@ -90,11 +92,13 @@ object NativeLinker {
     var clang: String = null
     var clangPP: String = null
     var compileOptions: Seq[String] = Seq.empty
+    var cppOptions: Seq[String] = Seq.empty
     var linkingOptions: Seq[String] = Seq.empty
     var gc: GC = GC.immix
     var mode: Mode = Mode.debug
     var lto: LTO = LTO.none
     var buildTarget: BuildTarget = BuildTarget.application
+    var targetTriple: Option[String] = None
 
     var i = 0
     while (i < args.length) {
@@ -126,6 +130,9 @@ object NativeLinker {
         case "--compile_option" =>
           compileOptions = compileOptions :+ args(i + 1)
           i += 2
+        case "--cpp_option" =>
+          cppOptions = cppOptions :+ args(i + 1)
+          i += 2
         case "--linking_option" =>
           linkingOptions = linkingOptions :+ args(i + 1)
           i += 2
@@ -140,6 +147,9 @@ object NativeLinker {
           i += 2
         case "--build_target" =>
           buildTarget = parseBuildTarget(args(i + 1))
+          i += 2
+        case "--target_triple" =>
+          targetTriple = Some(args(i + 1))
           i += 2
         case other =>
           throw new IllegalArgumentException(s"Unknown argument: $other")
@@ -168,11 +178,13 @@ object NativeLinker {
       clang = Paths.get(clang).toAbsolutePath(),
       clangPP = Paths.get(clangPP).toAbsolutePath(),
       compileOptions = compileOptions,
+      cppOptions = cppOptions,
       linkingOptions = linkingOptions,
       gc = gc,
       mode = mode,
       lto = lto,
       buildTarget = buildTarget,
+      targetTriple = targetTriple,
     )
   }
 
@@ -192,18 +204,21 @@ object NativeLinker {
       }
     }
 
-    val nativeConfig = NativeConfig.empty
-      .withClang(opts.clang)
-      .withClangPP(opts.clangPP)
-      .withGC(opts.gc)
-      .withMode(opts.mode)
-      .withLTO(opts.lto)
-      .withBuildTarget(opts.buildTarget)
-      .withLinkStubs(true)
-      .withLinkingOptions(Discover.linkingOptions() ++ makeAbsolute(opts.linkingOptions))
-      .withCompileOptions(Discover.compileOptions() ++ makeAbsolute(opts.compileOptions))
-      .withCppOptions(Seq("-std=c++17"))
-      .withCOptions(Seq("-std=c17"))
+    val nativeConfig = {
+      val base = NativeConfig.empty
+        .withClang(opts.clang)
+        .withClangPP(opts.clangPP)
+        .withGC(opts.gc)
+        .withMode(opts.mode)
+        .withLTO(opts.lto)
+        .withBuildTarget(opts.buildTarget)
+        .withLinkStubs(true)
+        .withLinkingOptions(Discover.linkingOptions() ++ makeAbsolute(opts.linkingOptions))
+        .withCompileOptions(Discover.compileOptions() ++ makeAbsolute(opts.compileOptions))
+        .withCppOptions(Seq("-std=c++17") ++ makeAbsolute(opts.cppOptions))
+        .withCOptions(Seq("-std=c17"))
+      opts.targetTriple.fold(base)(triple => base.withTargetTriple(triple))
+    }
 
     val config = Config.empty
       .withMainClass(Some(opts.mainClass))

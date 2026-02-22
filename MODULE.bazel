@@ -69,6 +69,7 @@ use_repo(
     "org_scala_native_test_interface",
     "org_scala_native_tools",
     "org_scala_native_util",
+    "org_scala_native_windowslib",
 )
 
 register_toolchains(

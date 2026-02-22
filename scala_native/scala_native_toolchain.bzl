@@ -16,6 +16,7 @@ def _scala_native_toolchain_impl(ctx):
         linker_binary = ctx.attr.linker_binary,
         test_interface = ctx.attr.test_interface,
         junit_runtime = ctx.attr.junit_runtime,
+        windowslib = ctx.attr.windowslib,
         scala_native_version = ctx.attr.scala_native_version,
     )
     return [toolchain_info]
@@ -69,6 +70,11 @@ scala_native_toolchain = rule(
             mandatory = True,
             providers = [JavaInfo],
             doc = "The Scala Native JUnit runtime",
+        ),
+        "windowslib": attr.label(
+            mandatory = False,
+            providers = [JavaInfo],
+            doc = "The Scala Native Windows API bindings library (needed for cross-compilation to Windows)",
         ),
         "scala_native_version": attr.string(
             default = "0.5.10",
