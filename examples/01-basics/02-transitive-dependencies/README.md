@@ -112,6 +112,4 @@ scala_native_library(
 
 ## Next Steps
 
-Now that you've mastered dependency management, let's explore how to integrate with C and C++ libraries.
-
-→ [03-static-and-dynamic-libraries](../03-static-and-dynamic-libraries/): Linking with native libraries.
+→ [03-testing](../03-testing/): Unit testing with JUnit.

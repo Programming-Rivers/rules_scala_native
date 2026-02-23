@@ -1,0 +1,19 @@
+load(
+    "@rules_scala_native//scala_native:scala_native_library.bzl",
+    "scala_native_library",
+)
+load(
+    "@rules_scala_native//scala_native:scala_native_test.bzl",
+    "scala_native_test",
+)
+
+scala_native_library(
+    name = "palindrome",
+    srcs = ["Palindrome.scala"],
+)
+
+scala_native_test(
+    name = "palindrome_test",
+    srcs = ["PalindromeTest.scala"],
+    deps = [":palindrome"],
+)
