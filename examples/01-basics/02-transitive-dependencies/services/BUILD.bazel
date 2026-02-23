@@ -1,0 +1,13 @@
+load(
+    "@rules_scala_native//scala_native:scala_native_library.bzl", 
+     "scala_native_library",
+)
+
+scala_native_library(
+    name = "formatter",
+    srcs = ["Formatter.scala"],
+    deps = [
+        "//core:char_operations",
+    ],
+    visibility = ["//:__subpackages__"]
+)

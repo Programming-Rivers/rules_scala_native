@@ -1,0 +1,24 @@
+load(
+    "@rules_scala_native//scala_native:scala_native_binary.bzl",
+    "scala_native_binary",
+)
+load(
+    "@rules_scala_native//scala_native:scala_native_library.bzl",
+    "scala_native_library",
+)
+
+scala_native_library(
+    name = "pretty_printer",
+    srcs = ["PrettyPrinter.scala"],
+    deps = [
+        "//services:formatter",
+    ],
+)
+
+scala_native_binary(
+    name = "main",
+    main_class = "example.run",
+    deps = [
+        ":pretty_printer",
+    ],
+)

@@ -1,0 +1,11 @@
+load(
+    "@rules_scala_native//scala_native:scala_native_library.bzl", 
+     "scala_native_library",
+)
+
+scala_native_library(
+    name = "char_operations",
+    srcs = ["CharOperations.scala"],
+    visibility = ["//visibility:public"],
+)
+
