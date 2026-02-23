@@ -1,0 +1,38 @@
+module(name = "example_00_bazel_setup")
+
+bazel_dep(name = "protobuf", version = "33.4")
+bazel_dep(name = "rules_scala", version = "7.2.2")
+bazel_dep(name = "rules_scala_native", version = "0.1.0")
+# The local_path_override is not needed when using a release version of rules_scala_native.
+# It is used here to point to the local checkout of rules_scala_native.
+local_path_override(
+    module_name = "rules_scala_native",
+    path = "../../..",
+)
+
+# Configure Scala
+scala_config = use_extension("@rules_scala//scala/extensions:config.bzl", "scala_config")
+scala_config.settings(scala_version = "3.8.1")
+
+scala_deps = use_extension("@rules_scala//scala/extensions:deps.bzl", "scala_deps")
+scala_deps.scala()
+use_repo(scala_deps, "rules_scala_toolchains")
+
+register_toolchains("@rules_scala_toolchains//...:all")
+
+# Configure Scala Native
+scala_native_deps = use_extension("@rules_scala_native//scala_native/extensions:deps.bzl", "scala_native_deps")
+use_repo(
+    scala_native_deps,
+    "org_scala_native_auxlib",
+    "org_scala_native_clib",
+    "org_scala_native_javalib",
+    "org_scala_native_nativelib",
+    "org_scala_native_nir",
+    "org_scala_native_nscplugin",
+    "org_scala_native_posixlib",
+    "org_scala_native_scalalib",
+    "org_scala_native_tools",
+    "org_scala_native_util",
+    "org_scala_native_windowslib",
+)
