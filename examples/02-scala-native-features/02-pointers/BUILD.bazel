@@ -1,0 +1,21 @@
+load(
+    "@rules_scala_native//scala_native:scala_native_binary.bzl",
+    "scala_native_binary",
+)
+load(
+    "@rules_scala_native//scala_native:scala_native_library.bzl",
+    "scala_native_library",
+)
+
+scala_native_library(
+    name = "pointer_example",
+    srcs = ["PointerOps.scala"],
+)
+
+scala_native_binary(
+    name = "main",
+    main_class = "examples.pointerExample",
+    deps = [
+        ":pointer_example",
+    ],
+)
