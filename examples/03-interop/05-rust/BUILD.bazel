@@ -1,0 +1,34 @@
+# rules_rust is required for building Rust code
+load(
+    "@rules_rust//rust:defs.bzl",
+    "rust_static_library",
+)
+load(
+    "@rules_scala_native//scala_native:scala_native_binary.bzl",
+    "scala_native_binary",
+)
+load(
+    "@rules_scala_native//scala_native:scala_native_library.bzl",
+    "scala_native_library",
+)
+
+# Build a static library from Rust source code.
+rust_static_library(
+    name = "rust_adder",
+    srcs = ["adder.rs"],
+)
+
+scala_native_library(
+    name = "scala_adder",
+    srcs = ["Adder.scala"],
+)
+
+scala_native_binary(
+    name = "main",
+    main_class = "examples.rustInterop",
+    deps = [
+        ":rust_adder", # Link the Rust code implementation
+        ":scala_adder",
+    ],
+)
+

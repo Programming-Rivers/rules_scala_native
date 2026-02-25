@@ -1,0 +1,9 @@
+common --tool_java_runtime_version=remotejdk_17
+common --java_runtime_version=remotejdk_17
+common --@protobuf//bazel/toolchains:prefer_prebuilt_protoc
+# Instruct clang to not link libunwind becaeuse
+# Rust has specific its own unwinding strategy for panics.
+# Note that unwinding accross FFI boundaries is undefined behavior.
+build --linkopt="-unwindlib=none"
+# Rust toolcahin needs libgcc_s
+build --@toolchains_llvm_bootstrapped//config:experimental_stub_libgcc_s=True
