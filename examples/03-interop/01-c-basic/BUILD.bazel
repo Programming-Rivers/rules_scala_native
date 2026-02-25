@@ -1,0 +1,34 @@
+# NOTE: cc_library is required for compiling C (or C++).
+load(
+    "@rules_cc//cc:cc_library.bzl",
+    "cc_library",
+)
+load(
+    "@rules_scala_native//scala_native:scala_native_binary.bzl",
+    "scala_native_binary",
+)
+load(
+    "@rules_scala_native//scala_native:scala_native_library.bzl",
+    "scala_native_library",
+)
+
+cc_library(
+    name = "c_adder",
+    srcs = ["adder.c"],
+)
+
+scala_native_library(
+    name = "scala_adder",
+    srcs = ["Adder.scala"],
+    # NOTE: No need to link the C code implementation to the scala_native_library.
+    # The C code will be linked to the scala_native_binary.
+)
+
+scala_native_binary(
+    name = "main",
+    main_class = "examples.add",
+    deps = [
+        ":c_adder",      # Link the C code implementation
+        ":scala_adder",
+    ],
+)
