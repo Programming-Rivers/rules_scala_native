@@ -1,0 +1,21 @@
+load(
+    "@rules_scala_native//scala_native:scala_native_library.bzl",
+    "scala_native_library",
+)
+load(
+    "@rules_scala_native//scala_native:scala_native_binary.bzl",
+    "scala_native_binary",
+)
+
+scala_native_library(
+    name = "intrinsics",
+    srcs = ["Intrinsics.scala"],
+)
+
+scala_native_binary(
+    name = "main",
+    main_class = "examples.intrinsicsExample",
+    deps = [
+        ":intrinsics",
+    ],
+)
