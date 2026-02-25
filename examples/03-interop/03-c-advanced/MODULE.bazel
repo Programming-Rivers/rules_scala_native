@@ -1,0 +1,81 @@
+module(name = "example_03_c_advanced")
+
+bazel_dep(
+    name = "protobuf",
+    version = "33.4",
+)
+bazel_dep(
+    name = "rules_scala",
+    version = "7.2.2",
+)
+
+# build rules that Bazel needs to compile, link, and produce artifacts from C or C++ source code.
+bazel_dep(
+    name = "rules_cc",
+    version = "0.2.16",
+)
+bazel_dep(
+    name = "rules_scala_native",
+    version = "0.1.0",
+)
+local_path_override(
+    module_name = "rules_scala_native",
+    path = "../../..",
+)
+
+# Use the hermetic, zero-sysroot LLVM toolchain from toolchains_llvm_bootstrapped.
+# A hermeticity isolates the build from host environment variations,
+#     ensuring bit-by-bit reproducibility.
+# A zero-sysroot toolchain provides its own C library and headers,
+#     avoiding host dependencies, making cross-compilation easier and more reliable.
+bazel_dep(
+    name = "toolchains_llvm_bootstrapped",
+    version = "0.5.9",
+)
+
+register_toolchains(
+    "@toolchains_llvm_bootstrapped//toolchain:all",
+)
+
+########################## Configure Scala ####################################
+scala_config = use_extension(
+    "@rules_scala//scala/extensions:config.bzl",
+    "scala_config",
+)
+scala_config.settings(scala_version = "3.8.1")
+use_repo(scala_config, "rules_scala_config")
+
+scala_deps = use_extension(
+    "@rules_scala//scala/extensions:deps.bzl",
+    "scala_deps",
+)
+scala_deps.scala()
+use_repo(scala_deps, "rules_scala_toolchains")
+
+scala_native_deps = use_extension(
+    "@rules_scala_native//scala_native/extensions:deps.bzl",
+    "scala_native_deps",
+)
+use_repo(
+    scala_native_deps,
+    "org_junit_junit",
+    "org_scala_native_auxlib",
+    "org_scala_native_clib",
+    "org_scala_native_javalib",
+    "org_scala_native_junit_plugin",
+    "org_scala_native_junit_runtime",
+    "org_scala_native_nativelib",
+    "org_scala_native_nir",
+    "org_scala_native_nscplugin",
+    "org_scala_native_posixlib",
+    "org_scala_native_scalalib",
+    "org_scala_native_test_interface",
+    "org_scala_native_test_interface_sbt_defs",
+    "org_scala_native_tools",
+    "org_scala_native_util",
+    "org_scala_native_windowslib",
+)
+
+register_toolchains(
+    "@rules_scala_toolchains//...:all",
+)

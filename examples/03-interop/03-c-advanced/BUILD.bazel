@@ -1,0 +1,31 @@
+load(
+    "@rules_cc//cc:cc_library.bzl",
+    "cc_library",
+)
+load(
+    "@rules_scala_native//scala_native:scala_native_binary.bzl",
+    "scala_native_binary",
+)
+load(
+    "@rules_scala_native//scala_native:scala_native_library.bzl",
+    "scala_native_library",
+)
+
+cc_library(
+    name = "c_callbacks",
+    srcs = ["callbacks.c"],
+)
+
+scala_native_library(
+    name = "scala_callbacks",
+    srcs = ["Callbacks.scala"],
+)
+
+scala_native_binary(
+    name = "main",
+    main_class = "examples.callbacks",
+    deps = [
+        ":c_callbacks",
+        ":scala_callbacks",
+    ],
+)
