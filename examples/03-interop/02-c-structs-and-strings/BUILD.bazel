@@ -1,0 +1,32 @@
+# NOTE: cc_library is required for compiling C (or C++).
+load(
+    "@rules_cc//cc:cc_library.bzl",
+    "cc_library",
+)
+load(
+    "@rules_scala_native//scala_native:scala_native_binary.bzl",
+    "scala_native_binary",
+)
+load(
+    "@rules_scala_native//scala_native:scala_native_library.bzl",
+    "scala_native_library",
+)
+
+cc_library(
+    name = "c_greeter",
+    srcs = ["greeter.c"],
+)
+
+scala_native_library(
+    name = "scala_greeter",
+    srcs = ["CGreeter.scala"],
+)
+
+scala_native_binary(
+    name = "main",
+    main_class = "examples.interopExample",
+    deps = [
+        ":c_greeter",
+        ":scala_greeter",
+    ],
+)
