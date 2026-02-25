@@ -1,0 +1,36 @@
+# rules_zig is required for building Zig code
+load(
+    "@rules_zig//zig:defs.bzl",
+    "zig_static_library",
+)
+load(
+    "@rules_scala_native//scala_native:scala_native_binary.bzl",
+    "scala_native_binary",
+)
+load(
+    "@rules_scala_native//scala_native:scala_native_library.bzl",
+    "scala_native_library",
+)
+
+# Build a static library from Zig source code.
+zig_static_library(
+    name = "zig_adder",
+    main = "adder.zig",
+    # -fPIC is required for linking with Scala Native
+    zigopts = ["-fPIC"],
+    compiler_runtime = "include",
+)
+
+scala_native_library(
+    name = "scala_adder",
+    srcs = ["Adder.scala"],
+)
+
+scala_native_binary(
+    name = "main",
+    main_class = "examples.add",
+    deps = [
+        ":zig_adder", # Link the Zig code implementation
+        ":scala_adder",
+    ],
+)
