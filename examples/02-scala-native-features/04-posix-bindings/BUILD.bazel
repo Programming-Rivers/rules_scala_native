@@ -1,0 +1,25 @@
+load(
+    "@rules_scala_native//scala_native:scala_native_binary.bzl",
+    "scala_native_binary",
+)
+load(
+    "@rules_scala_native//scala_native:scala_native_library.bzl",
+    "scala_native_library",
+)
+
+scala_native_library(
+    name = "posix_bindings",
+    srcs = ["FileStats.scala"],
+    deps = [
+        "@org_scala_native_posixlib//jar",  # Required for importing scala.scalanative.posix
+        "@org_scala_native_clib//jar",      # Required for access to types such as size_t
+    ],
+)
+
+scala_native_binary(
+    name = "main",
+    main_class = "examples.posixExample",
+    deps = [
+        ":posix_bindings",
+    ],
+)
