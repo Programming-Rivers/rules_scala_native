@@ -7,3 +7,11 @@ load(
     "scala_native_library",
 )
 
+# This rule is not needed for the examples,
+# But bazel requires at least one rule in the BUILD file.
+# Here is a simple Bazel build rule that writes "Hello, World!" to a file.
+genrule(
+    name = "main",
+    outs = ["output.txt"],
+    cmd = "echo 'Hello, World!' > $(location //:output.txt)",
+)
