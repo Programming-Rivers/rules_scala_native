@@ -2,7 +2,21 @@ load(
     "@rules_scala_native//scala_native:scala_native_binary.bzl",
     "scala_native_binary",
 )
+# Instruct bazel that the scala_native_library is required to build this package.
 load(
     "@rules_scala_native//scala_native:scala_native_library.bzl",
     "scala_native_library",
+)
+
+# Defines a library containing the greeting logic.
+scala_native_library(
+    name = "greetings",
+    srcs = ["Greetings.scala"],
+)
+
+# Defines the entry point required for the executable
+scala_native_binary(
+    name = "main",
+    main_class = "examples.greet",  # main_class must match the signature of the @main function in Greetings.scala
+    deps = [":greetings"],
 )

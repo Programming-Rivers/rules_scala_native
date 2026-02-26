@@ -32,7 +32,8 @@ Bazel ensures the required dependencies are built and available before running t
 
 Run this command to build, but not run, the binary:
 ```bash
-$ bazel build //:hello_world
+$ cd examples/01-basics/01-hello-world
+$ bazel build //:main
 ```
 
 ## Inspect the Build Output
@@ -95,8 +96,6 @@ ELF Header:
 
 ### BUILD.bazel
 ```python
-# BUILD.bazel
-
 load(
     "@rules_scala_native//scala_native:scala_native_binary.bzl",
     "scala_native_binary",
@@ -115,7 +114,7 @@ scala_native_library(
 
 # Defines the entry point required for the executable
 scala_native_binary(
-    name = "hello_world",
+    name = "main",
     main_class = "examples.greet",  # main_class must match the signature of the @main function in Greetings.scala
     deps = [":greetings"],
 )
