@@ -27,9 +27,6 @@ To run the tests:
 $ cd examples/01-basics/03-testing
 $ bazel test //:palindrome_test
 ```
-> TODO:
-The funcionality does not work as expected. Test failures are not reported correctly.
-
 
 If a test fails, Bazel will provide a path to the test log:
 ```bash
@@ -39,6 +36,7 @@ $ cat bazel-testlogs/palindrome_test/test.log
 ## Key Concepts
 
 - **`scala_native_test` rule**: A Bazel rule that compiles and runs Scala Native tests. It behaves similarly to `scala_native_binary` but is specifically designed for test execution.
+- **`suites` attribute**: **Crucial.** Unlike standard JVM `rules_scala`, `scala_native_test` currently requires an explicit list of fully qualified test class names in the `suites` attribute. Without this, no tests will be discovered.
 - **JUnit Integration**: `rules_scala_native` supports the JUnit testing framework. You can use `@Test`, `@Before`, `@After`, etc.
 - **Test Isolation**: Each test runs in its own sandbox, ensuring that tests don't interfere with each other or the host system.
 - **Caching**: Bazel only re-runs tests if the source code or dependencies have changed, significantly speeding up development.
@@ -70,8 +68,13 @@ scala_native_test(
     name = "palindrome_test",
     srcs = ["PalindromeTest.scala"],
     deps = [":palindrome"],
+    suites = ["examples.StringTest"],   # test suites must be explicitly listed
 )
 ```
+> Note: Bazel rule `scala_native_test` does not support automatic test discovery.
+  Test suites must be explicitly listed in the `suites` attribute.
+  In the future we should consider options to discover the tests automatically
+  and remove the `suites` attribute from scala_native_tests.
 
 ### `PalindromeTest.scala`
 
@@ -79,7 +82,7 @@ The test uses standard JUnit annotations and assertions.
 
 ```scala
 // PalindromeTest.scala
-package example
+package examples
 
 import org.junit.Test
 import org.junit.Assert.*
