@@ -2,52 +2,68 @@
 
 set -Eeuo pipefail
 
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+NC='\033[0m' # No Color
+
 readarray -t examples < <(find examples -name MODULE.bazel -exec dirname {} + | sort)
-echo "Found examples: "
-printf "* %s\n" "${examples[@]}"
+echo -e "${BOLD}${BLUE}Found examples:${NC}"
+printf "  ${CYAN}* %s${NC}\n" "${examples[@]}"
+echo -e "${BLUE}-----------------------------------------------------------------------${NC}"
+
 for example in "${examples[@]}"; do
-    echo "Building $example..."
+    echo -e "${BOLD}${YELLOW}Processing $example...${NC}"
     cd "$example"
-    echo "Current dir in: $PWD"
-    bazel build \
+    
+    # 1. Build
+    echo -e "  ${BOLD}[1/3] Build:${NC} //..."
+    bazel --quiet build \
       --ui_event_filters=-INFO,-PROGRESS --noshow_progress \
       //... \
     && rc=0 || rc=$?
     if [ $rc -ne 0 ]; then
-        echo "Build failed for $example with exit code $rc"
+        echo -e "  ${RED}✗ Build failed for $example with exit code $rc${NC}"
         exit $rc
     fi
-    echo "successfully built $example"
-    # Run bazel test //... if there are any test targets
+    echo -e "  ${GREEN}✓ Successfully built${NC}"
+
+    # 2. Test
+    echo -e "  ${BOLD}[2/3] Test:${NC} //..."
     if [[ -n $(bazel --quiet cquery 'kind(test, //...)' 2>/dev/null) ]]; then
-        bazel test \
+        bazel --quiet test \
           --ui_event_filters=-INFO,-PROGRESS --noshow_progress \
           //... \
         && rc=0 || rc=$?
         if [ $rc -ne 0 ]; then
-            echo "Test failed for $example with exit code $rc"
+            echo -e "  ${RED}✗ Test failed for $example with exit code $rc${NC}"
             exit $rc
         fi
-        echo "successfully tested $example"
+        echo -e "  ${GREEN}✓ Successfully tested${NC}"
     else
-        echo "Skipping tests for $example (no test targets found)"
+        echo -e "  ${CYAN}i Skipping tests (no test targets found)${NC}"
     fi
-    # Run bazel run //:main if it exists and it is executable
+
+    # 3. Run
+    echo -e "  ${BOLD}[3/3] Run:${NC} //:main"
     if [[ -n $(bazel --quiet cquery 'attr(executable, 1, //:main)' 2>/dev/null) ]]; then
-        bazel run \
+        bazel --quiet run \
           --ui_event_filters=-INFO,-PROGRESS --noshow_progress \
           //:main \
         && rc=0 || rc=$?
         if [ $rc -ne 0 ]; then
-            echo "Run failed for $example with exit code $rc"
+            echo -e "  ${RED}✗ Run failed for $example with exit code $rc${NC}"
             exit $rc
         fi
-        echo "successfully ran $example"
+        echo -e "  ${GREEN}✓ Successfully ran${NC}"
     else
-        echo "Skipping run for $example (no executable //:main target)"
+        echo -e "  ${CYAN}i Skipping run (no executable //:main target)${NC}"
     fi
-    cd -
-    echo "Current dir out: $PWD"
-    echo "-----------------------------------------------------------------------"
-    # exit 1
+
+    cd - > /dev/null
+    echo -e "${BLUE}-----------------------------------------------------------------------${NC}"
 done
