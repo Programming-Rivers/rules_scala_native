@@ -16,4 +16,5 @@ scala_native_test(
     name = "palindrome_test",
     srcs = ["PalindromeTest.scala"],
     deps = [":palindrome"],
+    suites = ["examples.StringTest"],   # test suites must be explicitly listed
 )

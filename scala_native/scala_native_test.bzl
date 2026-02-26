@@ -5,6 +5,9 @@ load("//scala_native/private/rules:scala_native_binary.bzl", "scala_native_inter
 
 def scala_native_test(name, srcs = [], deps = [], suites = [], scalacopts = [], **kwargs):
     """Macro to run Scala Native tests using JUnit."""
+    if not suites:
+        fail("scala_native_test '{}' requires a non-empty 'suites' list. ".format(name) +
+             "Specify fully qualified test class names, e.g. suites = [\"com.example.MyTest\"]")
     main_name = name + "_TestMain"
     main_file = name + "_TestMain.scala"
 
