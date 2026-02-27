@@ -46,7 +46,6 @@ def _scala_native_binary_impl(ctx):
         action_name = "c++-compile",
     )
 
-    target_triple = _get_target_triple(cc_toolchain)
 
     c_compile_variables = cc_common.create_compile_variables(
         feature_configuration = feature_configuration,
@@ -58,6 +57,10 @@ def _scala_native_binary_impl(ctx):
         action_name = "c-compile",
         variables = c_compile_variables,
     )
+
+    target_triple = getattr(scala_native_toolchain, "target_triple", "")
+    if not target_triple:
+        target_triple = _get_target_triple(cc_toolchain, c_compile_options)
 
     # Extract C++ compile options (may include additional include paths for C++ headers like <exception>)
     cpp_compile_variables = cc_common.create_compile_variables(
@@ -253,8 +256,18 @@ _TARGET_CPU_TO_TRIPLE = {
     "aarch64_windows": "aarch64-w64-windows-gnu",
 }
 
-def _get_target_triple(cc_toolchain):
-    """Derive the LLVM target triple from the CC toolchain's target CPU."""
+def _get_target_triple(cc_toolchain, c_compile_options):
+    """Derive the LLVM target triple from the CC toolchain's compile options or fallback to CPU map."""
+    if hasattr(cc_toolchain, "target_gnu_system_name") and cc_toolchain.target_gnu_system_name:
+        return cc_toolchain.target_gnu_system_name
+
+    for i in range(len(c_compile_options)):
+        opt = c_compile_options[i]
+        if opt == "-target" and i + 1 < len(c_compile_options):
+            return c_compile_options[i+1]
+        elif opt.startswith("--target="):
+            return opt[len("--target="):]
+
     target_cpu = cc_toolchain.cpu
     return _TARGET_CPU_TO_TRIPLE.get(target_cpu, None)
 

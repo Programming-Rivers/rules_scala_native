@@ -18,6 +18,7 @@ def _scala_native_toolchain_impl(ctx):
         junit_runtime = ctx.attr.junit_runtime,
         windowslib = ctx.attr.windowslib,
         scala_native_version = ctx.attr.scala_native_version,
+        target_triple = ctx.attr.target_triple,
     )
     return [toolchain_info]
 
@@ -79,6 +80,10 @@ scala_native_toolchain = rule(
         "scala_native_version": attr.string(
             default = "0.5.10",
             doc = "The Scala Native version",
+        ),
+        "target_triple": attr.string(
+            default = "",
+            doc = "The LLVM target triple for cross-compilation. If omitted, it will try to be inferred from the CC toolchain.",
         ),
     },
     provides = [platform_common.ToolchainInfo],
