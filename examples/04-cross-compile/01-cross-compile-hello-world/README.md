@@ -23,12 +23,12 @@ $ bazel build //... --platforms=<platform>
 > **Note:** The command should run from the same directory that contains the `MODULE.bazel` file.
 
 These are some platforms that you can use:
-* `@toolchains_llvm_bootstrapped//platforms:linux_aarch64`
-* `@toolchains_llvm_bootstrapped//platforms:linux_x86_64`
-* `@toolchains_llvm_bootstrapped//platforms:macos_aarch64`
-* `@toolchains_llvm_bootstrapped//platforms:macos_x86_64`
-* `@toolchains_llvm_bootstrapped//platforms:windows_aarch64`
-* `@toolchains_llvm_bootstrapped//platforms:windows_x86_64`
+* `@llvm//platforms:linux_aarch64`
+* `@llvm//platforms:linux_x86_64`
+* `@llvm//platforms:macos_aarch64`
+* `@llvm//platforms:macos_x86_64`
+* `@llvm//platforms:windows_aarch64`
+* `@llvm//platforms:windows_x86_64`
 
 ## Inspect the Build Output
 
@@ -36,35 +36,35 @@ The resulting binary will be built in the Bazel output directories (typically un
 
 For example, if you cross-compile to Linux x86_64:
 ```bash
-$ bazel build //:main --platforms=@toolchains_llvm_bootstrapped//platforms:linux_x86_64
+$ bazel build //:main --platforms=@llvm//platforms:linux_x86_64
 $ file bazel-bin/main
 bazel-bin/main: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 2.0.0, not stripped
 ```
 
 If you cross-compile to Linux aarch64:
 ```bash
-$ bazel build //:main --platforms=@toolchains_llvm_bootstrapped//platforms:linux_aarch64
+$ bazel build //:main --platforms=@llvm//platforms:linux_aarch64
 $ file bazel-bin/main
 bazel-bin/main: ELF 64-bit LSB pie executable, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-aarch64.so.1, for GNU/Linux 3.2.0, not stripped
 ```
 
 If you cross-compile to macOS aarch64:
 ```bash
-$ bazel build //:main --platforms=@toolchains_llvm_bootstrapped//platforms:macos_aarch64
+$ bazel build //:main --platforms=@llvm//platforms:macos_aarch64
 $ file bazel-bin/main
 bazel-bin/main: Mach-O 64-bit arm64 executable, flags:<NOUNDEFS|DYLDLINK|TWOLEVEL|PIE>
 ```
 
 On windows the output is `main.exe`, not `main`:
 ```bash
-$ bazel build //:main --platforms=@toolchains_llvm_bootstrapped//platforms:windows_aarch64
+$ bazel build //:main --platforms=@llvm//platforms:windows_aarch64
 $ file bazel-bin/main.exe
 bazel-bin/main.exe: PE32+ executable (console) Aarch64, for MS Windows, 6 sections
 ```
 
 ## Key Concepts
 - **Cross-compilation**: Compiling code for a platform other than the one you are currently running on.
-- **`--platforms` flag**: Instructs Bazel to build for a specific target platform. Bazel resolves this to the appropriate toolchain (like `@toolchains_llvm_bootstrapped`).
+- **`--platforms` flag**: Instructs Bazel to build for a specific target platform. Bazel resolves this to the appropriate toolchain (like `@llvm`).
 
 ## Code Highlights
 
@@ -76,11 +76,11 @@ bazel_dep(name = "protobuf", version = "33.4")
 bazel_dep(name = "rules_scala", version = "7.2.2")
 bazel_dep(name = "rules_scala_native", version = "0.1.0")
 # To cross-compile, we need a C/C++ toolchain.
-# toolchains_llvm_bootstrapped provides a hermetic, zero-sysroot LLVM toolchain.
-bazel_dep(name = "toolchains_llvm_bootstrapped", version = "0.5.9")
+# llvm provides a hermetic, zero-sysroot LLVM toolchain.
+bazel_dep(name = "llvm", version = "0.6.1")
 ```
 
-The `toolchains_llvm_bootstrapped` provides the LLVM for cross-compilation.
+The `llvm` provides the LLVM for cross-compilation.
 
 ### BUILD.bazel
 ```python

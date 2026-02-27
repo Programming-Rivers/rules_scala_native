@@ -98,10 +98,10 @@ For example, to see why `tar.bzl` is part of the dependency graph:
 $ bazel mod explain tar.bzl
 <root> (example_00_bazel_setup@_)
 └───rules_scala_native@_ 
-    └───toolchains_llvm_bootstrapped@0.5.9 
+    └───llvm@0.6.1 
         └───tar.bzl@0.6.0 # 
 ```
-The output shows that `tar.bzl` is part of the dependency graph because it is a dependency of `toolchains_llvm_bootstrapped`, which is a dependency of `rules_scala_native`, which is a dependency of your module.
+The output shows that `tar.bzl` is part of the dependency graph because it is a dependency of `llvm`, which is a dependency of `rules_scala_native`, which is a dependency of your module.
 
 ## Code Highlights
 

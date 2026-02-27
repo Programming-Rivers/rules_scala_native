@@ -140,7 +140,7 @@ common --@protobuf//bazel/toolchains:prefer_prebuilt_protoc
 # Note that unwinding accross FFI boundaries is undefined behavior.
 build --linkopt="-unwindlib=none"
 # Rust toolcahin needs libgcc_s
-build --@toolchains_llvm_bootstrapped//config:experimental_stub_libgcc_s=True
+build --@llvm//config:experimental_stub_libgcc_s=True
 ```
 The two extra settings required for Rust interop are:
 1. `build --linkopt="-unwindlib=none"`
@@ -148,12 +148,12 @@ The two extra settings required for Rust interop are:
    libunwind is used for unwinding the stack during an exception in C++.
    Rust does not use exceptions and has specific its own unwinding strategy for panics.
    Note that unwinding accross FFI boundaries is undefined behavior.
-2. `build --@toolchains_llvm_bootstrapped//config:experimental_stub_libgcc_s=True`
+2. `build --@llvm//config:experimental_stub_libgcc_s=True`
    Rust toolcahin needs libgcc_s.
-   The default toolchains_llvm_bootstrapped does not provide libgcc_s.
+   The default llvm does not provide libgcc_s.
    But it is possible to instruct the toolchain to provide the default libgcc_s,
    or a sepecific version of it.
-   See [Usage with Rust](https://github.com/cerisier/toolchains_llvm_bootstrapped?tab=readme-ov-file#usage-with-rust)
+   See [Usage with Rust](https://github.com/cerisier/llvm?tab=readme-ov-file#usage-with-rust)
    for other flags that may be required for interop with Rust. 
 
 ## Next Steps

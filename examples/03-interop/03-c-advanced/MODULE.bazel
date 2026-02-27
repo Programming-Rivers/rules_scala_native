@@ -23,18 +23,18 @@ local_path_override(
     path = "../../..",
 )
 
-# Use the hermetic, zero-sysroot LLVM toolchain from toolchains_llvm_bootstrapped.
+# Use the hermetic, zero-sysroot LLVM toolchain.
 # A hermeticity isolates the build from host environment variations,
 #     ensuring bit-by-bit reproducibility.
 # A zero-sysroot toolchain provides its own C library and headers,
 #     avoiding host dependencies, making cross-compilation easier and more reliable.
 bazel_dep(
-    name = "toolchains_llvm_bootstrapped",
-    version = "0.5.9",
+    name = "llvm",
+    version = "0.6.1",
 )
 
 register_toolchains(
-    "@toolchains_llvm_bootstrapped//toolchain:all",
+    "@llvm//toolchain:all",
 )
 
 ########################## Configure Scala ####################################

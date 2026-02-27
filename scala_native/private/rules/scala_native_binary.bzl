@@ -243,7 +243,7 @@ _scala_native_binary_attrs.update(toolchain_transition_attr)
 
 # Map CC toolchain target_cpu values to LLVM target triples.
 # The CC toolchain's target_cpu reflects the platform constraint values.
-# Note: toolchains_llvm_bootstrapped uses "win64" for Windows x86_64.
+# Note: llvm uses "win64" for Windows x86_64.
 _TARGET_CPU_TO_TRIPLE = {
     # Linux
     "k8": None,  # Native x86_64 Linux — no cross-compilation needed
@@ -252,7 +252,7 @@ _TARGET_CPU_TO_TRIPLE = {
     "darwin_x86_64": "x86_64-apple-darwin",
     "darwin_arm64": "aarch64-apple-darwin",
     "darwin": "aarch64-apple-darwin",
-    # Windows (MinGW) — toolchains_llvm_bootstrapped uses "win64"
+    # Windows (MinGW) — llvm uses "win64"
     "x64_windows": "x86_64-w64-windows-gnu",
     "win64": "x86_64-w64-windows-gnu",
     "aarch64_windows": "aarch64-w64-windows-gnu",

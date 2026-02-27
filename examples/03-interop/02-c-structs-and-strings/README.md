@@ -126,10 +126,10 @@ bazel_dep(
 
 # ...
 
-# Use the hermetic, zero-sysroot LLVM toolchain from toolchains_llvm_bootstrapped.
+# Use the hermetic, zero-sysroot LLVM toolchain.
 bazel_dep(
-    name = "toolchains_llvm_bootstrapped",
-    version = "0.5.9",
+    name = "llvm",
+    version = "0.6.1",
 )
 ```
 

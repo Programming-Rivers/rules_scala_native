@@ -4,8 +4,8 @@ bazel_dep(name = "protobuf", version = "33.4")
 bazel_dep(name = "rules_scala", version = "7.2.2")
 bazel_dep(name = "rules_scala_native", version = "0.1.0")
 # To cross-compile, we need a C/C++ toolchain.
-# toolchains_llvm_bootstrapped provides a hermetic, zero-sysroot LLVM toolchain.
-bazel_dep(name = "toolchains_llvm_bootstrapped", version = "0.5.9")
+# llvm provides a hermetic, zero-sysroot LLVM toolchain.
+bazel_dep(name = "llvm", version = "0.6.1")
 local_path_override(
     module_name = "rules_scala_native",
     path = "../../..",

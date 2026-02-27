@@ -6,4 +6,4 @@ common --@protobuf//bazel/toolchains:prefer_prebuilt_protoc
 # Note that unwinding accross FFI boundaries is undefined behavior.
 build --linkopt="-unwindlib=none"
 # Rust toolcahin needs libgcc_s
-build --@toolchains_llvm_bootstrapped//config:experimental_stub_libgcc_s=True
+build --@llvm//config:experimental_stub_libgcc_s=True

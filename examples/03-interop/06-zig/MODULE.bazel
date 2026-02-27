@@ -27,12 +27,12 @@ local_path_override(
 )
 
 bazel_dep(
-    name = "toolchains_llvm_bootstrapped",
-    version = "0.5.9",
+    name = "llvm",
+    version = "0.6.1",
 )
 
 register_toolchains(
-    "@toolchains_llvm_bootstrapped//toolchain:all",
+    "@llvm//toolchain:all",
 )
 
 zig = use_extension("@rules_zig//zig:extensions.bzl", "zig")

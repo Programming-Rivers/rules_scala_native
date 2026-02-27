@@ -79,14 +79,14 @@ bazel_dep(
 
 # ... 
 
-# Use the hermetic, zero-sysroot LLVM toolchain from toolchains_llvm_bootstrapped.
+# Use the hermetic, zero-sysroot LLVM toolchain.
 # A hermeticity isolates the build from host environment variations,
 #     ensuring bit-by-bit reproducibility.
 # A zero-sysroot toolchain provides its own C library and headers,
 #     avoiding host dependencies, making cross-compilation easier and more reliable.
 bazel_dep(
-    name = "toolchains_llvm_bootstrapped",
-    version = "0.5.9",
+    name = "llvm",
+    version = "0.6.1",
 )
 ```
 
@@ -94,7 +94,7 @@ Providinng a hermatic toolchain is not mandatory,
 but it prevents Bazel to fall back on the toolchain installed on the host,
 which can cause issues for cross-compilation.
 
-Here we use `toolchains_llvm_bootstrapped` to provide a hermatic toolchain,
+Here we use `llvm` to provide a hermatic toolchain,
 and vanish the source of many potential cross-compilation issues,
 such as the exact location or version of the library and headers.
 

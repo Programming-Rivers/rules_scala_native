@@ -25,11 +25,11 @@ module(name = "my_scala_native_app")
 bazel_dep(name = "protobuf", version = "33.4")
 bazel_dep(name = "rules_scala", version = "7.2.2")
 bazel_dep(name = "rules_scala_native", version = "0.1.0")
-bazel_dep(name = "toolchains_llvm_bootstrapped", version = "0.5.4")
+bazel_dep(name = "llvm", version = "0.5.4")
 
 # Register hermetic C++ toolchain (clang/lld) for cross-compilation
 register_toolchains(
-    "@toolchains_llvm_bootstrapped//toolchain:all",
+    "@llvm//toolchain:all",
 )
 
 # Configure Scala
@@ -134,7 +134,7 @@ $ bazel test //:hello_native_test
 Cross-compilation is as easy as passing the `--platforms` flag to Bazel:
 
 ```bash
- bazel build //... --platforms=@toolchains_llvm_bootstrapped//platforms:linux_aarch64
+ bazel build //... --platforms=@llvm//platforms:linux_aarch64
 ```
 
 `rules_scala_native` uses a hermetic C++ toolchain based on LLVM/Clang to cross-compile Scala Native code.
@@ -340,7 +340,7 @@ graph LR
 This project depends on:
 - [`rules_scala`](https://github.com/bazel-contrib/rules_scala) — for Scala compilation infrastructure
 - [`rules_cc`](https://github.com/bazelbuild/rules_cc) — for C++ toolchain access
-- [`toolchains_llvm_bootstrapped`](https://github.com/nicholasgasior/toolchains_llvm_bootstrapped) — for hermetic clang/lld
+- [`llvm`](https://github.com/nicholasgasior/llvm) — for hermetic clang/lld
 
 ## Current Limitations
 
