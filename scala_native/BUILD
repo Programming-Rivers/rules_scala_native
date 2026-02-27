@@ -32,3 +32,9 @@ toolchain(
     toolchain_type = ":toolchain_type",
     visibility = ["//visibility:public"],
 )
+
+filegroup(
+    name = "all_files",
+    srcs = glob(["**"]),
+    visibility = ["//visibility:public"],
+)

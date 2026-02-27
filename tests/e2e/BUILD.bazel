@@ -1,0 +1,48 @@
+load("@bazel_binaries//:defs.bzl", "bazel_binaries")
+load(
+    "@rules_bazel_integration_test//bazel_integration_test:defs.bzl",
+    "bazel_integration_test",
+    "default_test_runner",
+)
+
+default_test_runner(
+    name = "default_test_runner",
+    bazel_cmds = [
+        "info",
+        "build //...",
+    ],
+)
+
+EXAMPLE_WORKSPACES = [
+    "examples/01-basics/00-bazel-setup",
+    "examples/01-basics/01-hello-world",
+    "examples/01-basics/02-transitive-dependencies",
+    "examples/01-basics/03-testing",
+    "examples/02-scala-native-features/01-zone-allocator",
+    "examples/02-scala-native-features/02-pointers",
+    "examples/02-scala-native-features/03-c-structs",
+    "examples/02-scala-native-features/04-posix-bindings",
+    "examples/02-scala-native-features/05-intrinsics",
+    "examples/03-interop/01-c-basic",
+    "examples/03-interop/02-c-structs-and-strings",
+    "examples/03-interop/03-c-advanced",
+    "examples/03-interop/04-cpp",
+    "examples/03-interop/05-rust",
+    "examples/03-interop/06-zig",
+    "examples/04-cross-compile/01-cross-compile-hello-world",
+    "examples/04-cross-compile/02-cross-compile-with-musl",
+    "examples/04-cross-compile/03-cross-compile-with-glibc",
+]
+
+[
+    bazel_integration_test(
+        name = "test_" + workspace.replace("/", "_").replace("-", "_"),
+        test_runner = ":default_test_runner",
+        bazel_binaries = bazel_binaries,
+        bazel_version = "9.0.0",
+        workspace_files = ["//:local_repository_files"],
+        workspace_path = workspace,
+        tags = ["exclusive"],
+    )
+    for workspace in EXAMPLE_WORKSPACES
+]
