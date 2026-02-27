@@ -31,8 +31,8 @@ Master the art of calling code written in other native languages.
 - **[05-rust](./03-interop/05-rust)**: seamless integration with the Rust ecosystem.
 - **[06-zig](./03-interop/06-zig)**: Using Zig as a modern systems language with Scala Native.
 
-### 3. [Cross-compilation](./04-cross-compile)
-- **[01-c-basic](./04-cross-compile/01-cross-compile-hello-world)**: Cross compile hello world to various platforms
+### 4. [Cross-compilation](./04-cross-compile)
+- **[01-cross-compile-hello-world](./04-cross-compile/01-cross-compile-hello-world)**: Cross compile hello world to various platforms
 
 ## 🚀 How to Run
 
