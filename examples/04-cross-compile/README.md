@@ -1,8 +1,8 @@
 # Cross-Compilation
 
-This section demonstrates how to configure and execute cross-compilation for Scala Native projects using Bazel. It covers building binaries for different hardware architectures and operating systems from a single host machine.
+This section demonstrates how to build Scala Native applications for different architectures and operating systems using Bazel's platform-based toolchain resolution.
 
 ## Examples
 
-- **[01-cross-compile-hello-world](01-cross-compile-hello-world)**:
-  Cross-compiling a basic Scala Native application for various platforms using a hermetic LLVM toolchain.
+- **[01-cross-compile-hello-world](01-cross-compile-hello-world)**: Basic cross-compilation of a "Hello World" application to various platforms (Linux, macOS, Windows).
+- **[02-cross-compile-with-musl](02-cross-compile-with-musl)**: Targeting Linux with the `musl` C library instead of the default `glibc`.
