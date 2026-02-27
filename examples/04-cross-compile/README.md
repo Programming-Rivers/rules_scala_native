@@ -4,4 +4,5 @@ This section demonstrates how to configure and execute cross-compilation for Sca
 
 ## Examples
 
-- **[01-hello-world](01-hello-world)**: Cross-compiling a basic Scala Native application for various platforms using a hermetic LLVM toolchain.
+- **[01-cross-compile-hello-world](01-cross-compile-hello-world)**:
+  Cross-compiling a basic Scala Native application for various platforms using a hermetic LLVM toolchain.
