@@ -61,6 +61,8 @@ def _scala_native_binary_impl(ctx):
     target_triple = getattr(scala_native_toolchain, "target_triple", "")
     if not target_triple:
         target_triple = _get_target_triple(cc_toolchain, c_compile_options)
+    
+    _validate_target(target_triple)
 
     # Extract C++ compile options (may include additional include paths for C++ headers like <exception>)
     cpp_compile_variables = cc_common.create_compile_variables(
@@ -255,6 +257,19 @@ _TARGET_CPU_TO_TRIPLE = {
     "win64": "x86_64-w64-windows-gnu",
     "aarch64_windows": "aarch64-w64-windows-gnu",
 }
+
+_UNSUPPORTED_TARGET_PATTERNS = ["wasm32", "wasm64"]
+
+def _validate_target(target_triple):
+    """Fail fast for platforms Scala Native cannot target."""
+    if target_triple:
+        for pattern in _UNSUPPORTED_TARGET_PATTERNS:
+            if pattern in target_triple:
+                fail(
+                    "Scala Native does not support target '{}'. ".format(target_triple) +
+                    "Supported targets: Linux (x86_64, aarch64), macOS (x86_64, aarch64), " +
+                    "Windows (x86_64, aarch64)."
+                )
 
 def _get_target_triple(cc_toolchain, c_compile_options):
     """Derive the LLVM target triple from the CC toolchain's compile options or fallback to CPU map."""
