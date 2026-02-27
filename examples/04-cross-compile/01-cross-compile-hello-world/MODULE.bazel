@@ -1,4 +1,4 @@
-module(name = "example_01_example_cross_compile_hello_world")
+module(name = "example_01_cross_compile_hello_world")
 
 bazel_dep(name = "protobuf", version = "33.4")
 bazel_dep(name = "rules_scala", version = "7.2.2")

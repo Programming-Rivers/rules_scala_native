@@ -16,7 +16,7 @@ The entry point is the `greet` function in `Greetings.scala`, which is annotated
 
 To cross-compile the binary for a specific target, use the `--platforms` flag:
 ```bash
-$ cd examples/04-cross-compile/01-hello-world
+$ cd examples/04-cross-compile/01-cross-compile-hello-world
 $ bazel build //... --platforms=<platform>
 ```
 
@@ -70,7 +70,7 @@ bazel-bin/main.exe: PE32+ executable (console) Aarch64, for MS Windows, 6 sectio
 
 ### MODULE.bazel (partial)
 ```python
-module(name = "example_01_example_cross_compile_hello_world")
+module(name = "example_01_cross_compile_hello_world")
 
 bazel_dep(name = "protobuf", version = "33.4")
 bazel_dep(name = "rules_scala", version = "7.2.2")
@@ -119,6 +119,4 @@ def greet: Unit =
   println(s"Hello from Scala Native!")
 ```
 
-## Next Steps
-
-→ [02-binary-with-dep](../02-binary-with-dep/): Linking binaries with external dependencies.
+→ [02-cross-compile-with-musl](../02-cross-compile-with-musl/): Targeting Linux with the musl C library.
