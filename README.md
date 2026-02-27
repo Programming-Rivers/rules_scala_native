@@ -13,7 +13,7 @@ This project provides two main rules:
 - **Bazel 9+** (bzlmod only, no WORKSPACE support)
 - **Scala 3.8.1**
 - **Scala Native 0.5.10**
-- **Linux, macOS** (x86_64, aarch64)
+- **Linux, macOS, Windows** (x86_64, aarch64)
 
 ## Quick Start
 
@@ -27,7 +27,7 @@ bazel_dep(name = "rules_scala", version = "7.2.2")
 bazel_dep(name = "rules_scala_native", version = "0.1.0")
 bazel_dep(name = "toolchains_llvm_bootstrapped", version = "0.5.4")
 
-# Register hermetic C++ toolchain (clang/lld) for native linking
+# Register hermetic C++ toolchain (clang/lld) for cross-compilation
 register_toolchains(
     "@toolchains_llvm_bootstrapped//toolchain:all",
 )
@@ -106,8 +106,11 @@ scala_native_test(
     name = "hello_native_test",
     srcs = ["NativeTest.scala"],
     deps = [":hello_native"],
+    suites = ["examples.native.NativeTest"],   # test suites must be explicitly listed
 )
 ```
+> [!WARNING]
+> The test rule requires the suites to be listed explicitly. This is a known issue and is being worked on.
 
 ### 5. Build and run
 
@@ -128,7 +131,13 @@ $ bazel test //:hello_native_test
 
 ## Cross-Compilation Support
 
-`rules_scala_native` supports hermetic cross-compilation by bridging Bazel's C++ toolchain infrastructure with the Scala Native linking pipeline. This ensures that target triples, sysroots, and standard library configurations are correctly applied.
+Cross-compilation is as easy as passing the `--platforms` flag to Bazel:
+
+```bash
+ bazel build //... --platforms=@toolchains_llvm_bootstrapped//platforms:linux_aarch64
+```
+
+`rules_scala_native` uses a hermetic C++ toolchain based on LLVM/Clang to cross-compile Scala Native code.
 
 ### Support Matrix
 
@@ -138,12 +147,14 @@ $ bazel test //:hello_native_test
 | Linux       | x86_64         | glibc (2.28—2.42), musl | ✅ Succeeded | ✅ Succeeded  |
 | macOS       | aarch64        | Native Apple SDK        | ✅ Succeeded | ✅ Succeeded  |
 | macOS       | x86_64         | Native Apple SDK        | ✅ Succeeded | ❓ Not tested |
-| Windows     | aarch64        | -                       | ❌ Failed    | -             |
-| Windows     | x86_64         | -                       | ❌ Failed    | -             |
-| WebAssembly | wasm32         | -                       | ❌ Failed    | -             |
-| WebAssembly | wasm64         | -                       | ❌ Failed    | -             |
+| Windows     | aarch64        | -                       | ✅ Succeeded | ❓ Not tested |
+| Windows     | x86_64         | -                       | ✅ Succeeded | ❓ Not tested |
 
-> **Note:** Cross-compilation has been verified from a Linux x86_64 host to a total of 72 targets, including multiple architectures and glibc versions 2.28 through 2.42.
+There is no plan to support WebAssembly targets.
+
+> [!Note]
+> Cross-compilation has been verified from a Linux x86_64 host to a total of 72 targets,
+> including multiple architectures, musl, and glibc versions 2.28 through 2.42.
 
 ## Interoperability with Other Languages
 
@@ -303,19 +314,26 @@ scala_native_binary(
 ### Build Pipeline
 
 ```
-Scala sources  →  scalac + nscplugin  →  .class + .nir files  →  Scala Native linker  →  native binary
-                                                                        ↓
-                                                                   clang/lld (hermetic)
+```mermaid
+graph LR
+    Scala_Sources[scala sources] --> scalac
+    nscplugin --> scalac
+    scalac --> class_files[".class files"]
+    scalac --> nir_files[".nir files"]
+    class_files --> scala_native_linker[Scala native linker]
+    nir_files --> scala_native_linker
+    scala_native_linker --> LLVM
+    LLVM --> native_binary[native binary]
 ```
 
 ### Key Components
 
-| Component | Description |
-|-----------|-------------|
-| `scala_native_toolchain` | Manages Scala Native dependencies (nscplugin, runtime libs, linker) |
-| `scala_native_library` macro | Injects the nscplugin compiler plugin for NIR generation |
-| `scala_native_test` | Runs Scala Native JUnit tests |
-| `NativeLinker` | Bridges the Scala Native build API with Bazel's action graph |
+| Component                | Description                                                              |
+|--------------------------|--------------------------------------------------------------------------|
+| `scala_native_toolchain` | Manages Scala Native dependencies (nscplugin, runtime libs, linker)      |
+| `scala_native_library`   | Injects the nscplugin compiler plugin for NIR generation                 |
+| `scala_native_test`      | Runs Scala Native JUnit tests                                            |
+| `NativeLinker`           | Bridges the Scala Native build API with Bazel's action graph             |
 
 ### Dependencies
 
