@@ -7,7 +7,7 @@ Provides Bazel rules for building Scala Native applications:
 
 module(
     name = "rules_scala_native",
-    version = "0.1.0-rc1",
+    version = "0.1.0-rc2",
     bazel_compatibility = [">=9.0.0"],
     compatibility_level = 0,
 )
