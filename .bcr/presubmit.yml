@@ -1,0 +1,14 @@
+bcr_test_module:
+    module_path: "examples/01-basics/03-testing"
+    matrix:
+        platform: ["debian10", "ubuntu2004", "macos", "windows"]
+        bazel: ["9.x"]
+    tasks:
+        run_tests:
+            name: "Run test module"
+            platform: ${{ platform }}
+            bazel: ${{ bazel }}
+            build_targets:
+                - "//..."
+            test_targets:
+                - "//:palindrome_test"
