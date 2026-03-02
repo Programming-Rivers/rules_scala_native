@@ -1,0 +1,23 @@
+# The build file that will be used to build the WiringPi library.
+load(
+    "@rules_cc//cc:cc_library.bzl",
+    "cc_library",
+)
+
+cc_library(
+    name = "wiringpi_lib",
+    srcs = glob([
+        "wiringPi/*.c",
+    ], exclude = [
+        # These files seem to be stale and have typos
+        "wiringPi/drcNet.c",  
+        "wiringPi/WiringpiV1.c",
+    ]),
+    hdrs = ["version.h"] + glob([
+        "wiringPi/*.h",
+        "wiringPiD/*.h",
+    ]),
+    includes = ["wiringPi/"],
+    copts = ["-D_GNU_SOURCE"],  # required for functions such as `poll` and `ppoll`
+    visibility = ["//visibility:public"],
+)

@@ -1,0 +1,37 @@
+load(
+  "@rules_scala_native//scala_native:scala_native_binary.bzl",
+  "scala_native_binary",
+)
+load(
+  "@rules_scala_native//scala_native:scala_native_library.bzl",
+  "scala_native_library",
+)
+
+scala_native_library(
+    name = "wirirng_pi_sn_bindgen",
+    srcs = [
+      "src/main/scala/WiringPi.scala",
+    ],
+    deps = [
+        "@org_scala_native_clib",
+        "@org_scala_native_posixlib",
+    ],
+)
+
+scala_native_library(
+    name = "wiringpi_sn",
+    srcs = [
+      "src/main/scala/Main.scala",
+    ],
+    deps = [
+        ":wirirng_pi_sn_bindgen",
+    ],
+)
+scala_native_binary(
+    name = "main",
+    main_class = "examples.main",
+    deps = [
+        "@wiringpi//:wiringpi_lib",
+        ":wiringpi_sn",
+    ],
+)
