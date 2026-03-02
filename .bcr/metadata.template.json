@@ -2,12 +2,15 @@
   "homepage": "https://github.com/Programming-Rivers/rules_scala_native",
   "maintainers": [
     {
-      "github": "meisam",
-      "github_user_id": 335463,
-      "name": "Meisam",
+      "github": "Programming-Rivers",
+      "github_user_id": 227201574,
+      "name": "Rules Scala Native Owners",
       "email": "rules-scala-native-owners@googlegroup.com"
     }
   ],
   "versions": [],
-  "yanked_versions": {}
+  "yanked_versions": {},
+  "repository": [
+    "github:Programming-Rivers/rules_scala_native"
+  ]
 }
