@@ -14,6 +14,7 @@ filegroup(
         "//scala_native/private/linker:all_files",
         "//scala_native/private/rules:all_files",
         "//scala_native/extensions:all_files",
+        "//tests/unit:all_files",
     ],
     visibility = ["//visibility:public"],
 )

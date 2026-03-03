@@ -1,0 +1,27 @@
+"""Unit tests for rules_scala_native Starlark rules.
+
+Uses bazel_skylib's unittest (pure function tests) and analysistest
+(provider/rule analysis tests) frameworks.
+
+Run all tests:
+    bazel test //tests/unit/...
+
+Run individual suites:
+    bazel test //tests/unit:target_triple_tests
+    bazel test //tests/unit:providers_tests
+"""
+
+load(":target_triple_test.bzl", "target_triple_test_suite")
+load(":providers_test.bzl", "providers_test_suite")
+
+# Pure unit tests for target triple helper functions
+target_triple_test_suite(name = "target_triple_tests")
+
+# Analysis tests for ScalaNativeInfo provider
+providers_test_suite(name = "providers_tests")
+
+filegroup(
+    name = "all_files",
+    srcs = glob(["**"]),
+    visibility = ["//visibility:public"],
+)
