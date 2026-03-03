@@ -24,6 +24,13 @@ load(
     "//scala_native:providers.bzl",
     "ScalaNativeInfo",
 )
+load(
+    "//scala_native/private/rules:target_triple.bzl",
+    "get_platform_link_flags",
+    "get_target_triple_from_cpu",
+    "get_target_triple_from_options",
+    "validate_target_triple",
+)
 
 def _scala_native_binary_impl(ctx):
     # Get the Scala Native toolchain
@@ -60,9 +67,12 @@ def _scala_native_binary_impl(ctx):
 
     target_triple = getattr(scala_native_toolchain, "target_triple", "")
     if not target_triple:
-        target_triple = _get_target_triple(cc_toolchain, c_compile_options)
-    
-    _validate_target(target_triple)
+        if hasattr(cc_toolchain, "target_gnu_system_name") and cc_toolchain.target_gnu_system_name:
+            target_triple = cc_toolchain.target_gnu_system_name
+        else:
+            target_triple = get_target_triple_from_options(c_compile_options) or get_target_triple_from_cpu(cc_toolchain.cpu)
+
+    validate_target_triple(target_triple)
 
     # Extract C++ compile options (may include additional include paths for C++ headers like <exception>)
     cpp_compile_variables = cc_common.create_compile_variables(
@@ -193,10 +203,7 @@ def _scala_native_binary_impl(ctx):
             
     # Platform-specific link flags: POSIX systems need pthread, dl, m;
     # Windows (MinGW) does not, but needs dbghelp, userenv, etc.
-    if target_triple and "windows" in target_triple:
-        platform_link_flags = ["-luserenv", "-ldbghelp", "-lws2_32", "-lbcrypt", "-lcrypt32"]
-    else:
-        platform_link_flags = ["-pthread", "-ldl", "-lm"]
+    platform_link_flags = get_platform_link_flags(target_triple)
 
     linking_outputs = cc_common.link(
         actions = ctx.actions,
@@ -241,50 +248,6 @@ _scala_native_binary_attrs = {
 
 _scala_native_binary_attrs.update(toolchain_transition_attr)
 
-# Map CC toolchain target_cpu values to LLVM target triples.
-# The CC toolchain's target_cpu reflects the platform constraint values.
-# Note: llvm uses "win64" for Windows x86_64.
-_TARGET_CPU_TO_TRIPLE = {
-    # Linux
-    "k8": None,  # Native x86_64 Linux — no cross-compilation needed
-    "aarch64": "aarch64-unknown-linux-gnu",
-    # macOS
-    "darwin_x86_64": "x86_64-apple-darwin",
-    "darwin_arm64": "aarch64-apple-darwin",
-    "darwin": "aarch64-apple-darwin",
-    # Windows (MinGW) — llvm uses "win64"
-    "x64_windows": "x86_64-w64-windows-gnu",
-    "win64": "x86_64-w64-windows-gnu",
-    "aarch64_windows": "aarch64-w64-windows-gnu",
-}
-
-_UNSUPPORTED_TARGET_PATTERNS = ["wasm32", "wasm64"]
-
-def _validate_target(target_triple):
-    """Fail fast for platforms Scala Native cannot target."""
-    if target_triple:
-        for pattern in _UNSUPPORTED_TARGET_PATTERNS:
-            if pattern in target_triple:
-                fail(
-                    "Scala Native does not support target '{}'. ".format(target_triple) +
-                    "Supported targets: Linux (x86_64, aarch64), macOS (x86_64, aarch64), " +
-                    "Windows (x86_64, aarch64)."
-                )
-
-def _get_target_triple(cc_toolchain, c_compile_options):
-    """Derive the LLVM target triple from the CC toolchain's compile options or fallback to CPU map."""
-    if hasattr(cc_toolchain, "target_gnu_system_name") and cc_toolchain.target_gnu_system_name:
-        return cc_toolchain.target_gnu_system_name
-
-    for i in range(len(c_compile_options)):
-        opt = c_compile_options[i]
-        if opt == "-target" and i + 1 < len(c_compile_options):
-            return c_compile_options[i+1]
-        elif opt.startswith("--target="):
-            return opt[len("--target="):]
-
-    target_cpu = cc_toolchain.cpu
-    return _TARGET_CPU_TO_TRIPLE.get(target_cpu, None)
 
 scala_native_binary = rule(
     implementation = _scala_native_binary_impl,
