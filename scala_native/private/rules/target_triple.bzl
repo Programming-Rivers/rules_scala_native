@@ -87,44 +87,44 @@ def get_platform_link_flags(target_triple):
         return ["-luserenv", "-ldbghelp", "-lws2_32", "-lbcrypt", "-lcrypt32"]
     else:
         return ["-pthread", "-ldl", "-lm"]
-def get_linking_path(host_path_separator, clang_path, ar_path):
+
+def get_linking_path(host_path_separator, clang_path):
     """Constructs the PATH environment variable for the Scala Native linker.
+
+    The Scala Native linker binary discovers `llvm-ar` at runtime by searching
+    PATH (or the LLVM_BIN env var). Since the @llvm hermetic toolchain always
+    places `llvm-ar` alongside `clang` in the same bin directory, putting the
+    clang directory in PATH is sufficient for the linker to find all LLVM tools.
+
+    Bazel guarantees forward-slash paths on all platforms (including Windows),
+    so `rpartition("/")` is the correct way to extract the directory.
 
     Args:
         host_path_separator: The path separator for the host platform (':' or ';').
-        clang_path: Absolute path to the clang compiler.
-        ar_path: Absolute path to the archiver (ar / llvm-ar).
+        clang_path: Absolute path to the clang compiler binary.
 
     Returns:
-        A string containing the PATH environment variable.
+        A string suitable for use as the PATH environment variable.
     """
-    # Use a dict to deduplicate paths while preserving order
-    unique_paths = {}
+    clang_bin_dir = clang_path.rpartition("/")[0]
 
-    def add_path(p):
-        if p and p not in unique_paths:
-            unique_paths[p] = True
+    # Build the path list, deduplicating while preserving insertion order.
+    seen = {}
+    paths = []
 
-    def get_dir(p):
-        # Bazel usually uses forward slashes even on Windows, but check for both.
-        # rpartition returns (before, separator, after)
-        for sep in ["/", "\\"]:
-            before, s, _ = p.rpartition(sep)
-            if s:
-                return before
-        return ""
+    def _add(p):
+        if p not in seen:
+            seen[p] = True
+            paths.append(p)
 
-    add_path(get_dir(clang_path))
-    add_path(get_dir(ar_path))
+    _add(clang_bin_dir)
 
-    # Add standard paths for tools that might be needed by the linker
-    # discovery but are not part of the hermetic toolchain (e.g. system libs)
+    # On POSIX, also include standard system directories so that any system
+    # tools invoked transitively by the linker (e.g. shell utilities) can be
+    # found. These are not needed on Windows because the Windows system32 dir
+    # is already on PATH by default in the execution environment.
     if host_path_separator == ":":
-        add_path("/usr/bin")
-        add_path("/bin")
-    elif host_path_separator == ";":
-        # Standard Windows system paths
-        add_path("C:\\Windows\\System32")
-        add_path("C:\\Windows")
+        _add("/usr/bin")
+        _add("/bin")
 
-    return host_path_separator.join(unique_paths.keys())
+    return host_path_separator.join(paths)

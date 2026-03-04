@@ -165,16 +165,12 @@ def _scala_native_binary_impl(ctx):
     for opt in link_options:
         args.add("--linking_option", opt)
 
-    # Get the directory for the archiver (ar / llvm-ar)
-    ar_path = cc_common.get_tool_for_action(
-        feature_configuration = feature_configuration,
-        action_name = "cpp-link-static-library",
-    )
-    
+    # The Scala Native linker binary discovers llvm-ar at runtime by searching
+    # PATH. Since the hermetic @llvm toolchain always places llvm-ar alongside
+    # clang in the same bin directory, the clang directory in PATH is sufficient.
     linking_path = get_linking_path(
         ctx.configuration.host_path_separator,
         clang_path,
-        ar_path,
     )
 
     ctx.actions.run(
