@@ -8,6 +8,7 @@ load("@bazel_skylib//lib:unittest.bzl", "asserts", "unittest")
 load(
     "//scala_native/private/rules:target_triple.bzl",
     "TARGET_CPU_TO_TRIPLE",
+    "get_linking_path",
     "get_platform_link_flags",
     "get_target_triple_from_cpu",
     "get_target_triple_from_options",
@@ -314,6 +315,54 @@ _platform_flags_none_triple_test = unittest.make(
 )
 
 # ===========================================================================
+# Tests for get_linking_path
+# ===========================================================================
+
+def _linking_path_posix_test_impl(ctx):
+    env = unittest.begin(ctx)
+    # POSIX uses ':' and includes /usr/bin, /bin
+    result = get_linking_path(
+        ":",
+        "/path/to/llvm/bin/clang",
+        "/path/to/llvm/bin/ar",
+    )
+    asserts.equals(env, "/path/to/llvm/bin:/path/to/llvm/bin:/usr/bin:/bin", result)
+    return unittest.end(env)
+
+_linking_path_posix_test = unittest.make(
+    _linking_path_posix_test_impl,
+)
+
+def _linking_path_windows_test_impl(ctx):
+    env = unittest.begin(ctx)
+    # Windows uses ';' and should NOT include /usr/bin, /bin
+    result = get_linking_path(
+        ";",
+        "C:/llvm/bin/clang.exe",
+        "C:/llvm/bin/llvm-ar.exe",
+    )
+    asserts.equals(env, "C:/llvm/bin;C:/llvm/bin", result)
+    return unittest.end(env)
+
+_linking_path_windows_test = unittest.make(
+    _linking_path_windows_test_impl,
+)
+
+def _linking_path_different_dirs_test_impl(ctx):
+    env = unittest.begin(ctx)
+    result = get_linking_path(
+        ":",
+        "/usr/local/bin/clang",
+        "/opt/llvm/bin/ar",
+    )
+    asserts.equals(env, "/usr/local/bin:/opt/llvm/bin:/usr/bin:/bin", result)
+    return unittest.end(env)
+
+_linking_path_different_dirs_test = unittest.make(
+    _linking_path_different_dirs_test_impl,
+)
+
+# ===========================================================================
 # Test suite entry point
 # ===========================================================================
 
@@ -351,4 +400,8 @@ def target_triple_test_suite(name):
         _platform_flags_windows_aarch64_test,
         _platform_flags_empty_triple_test,
         _platform_flags_none_triple_test,
+        # get_linking_path tests
+        _linking_path_posix_test,
+        _linking_path_windows_test,
+        _linking_path_different_dirs_test,
     )

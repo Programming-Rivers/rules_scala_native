@@ -26,6 +26,7 @@ load(
 )
 load(
     "//scala_native/private/rules:target_triple.bzl",
+    "get_linking_path",
     "get_platform_link_flags",
     "get_target_triple_from_cpu",
     "get_target_triple_from_options",
@@ -164,6 +165,18 @@ def _scala_native_binary_impl(ctx):
     for opt in link_options:
         args.add("--linking_option", opt)
 
+    # Get the directory for the archiver (ar / llvm-ar)
+    ar_path = cc_common.get_tool_for_action(
+        feature_configuration = feature_configuration,
+        action_name = "cpp-link-static-library",
+    )
+    
+    linking_path = get_linking_path(
+        ctx.configuration.host_path_separator,
+        clang_path,
+        ar_path,
+    )
+
     ctx.actions.run(
         outputs = [native_lib],
         inputs = depset(transitive = [
@@ -177,7 +190,7 @@ def _scala_native_binary_impl(ctx):
         progress_message = "Generating native objects for %s" % module_name,
         toolchain = "//scala_native:toolchain_type",
         env = {
-            "PATH": clang_path.rpartition("/")[0] + ":/usr/bin:/bin",
+            "PATH": linking_path,
         },
     )
     

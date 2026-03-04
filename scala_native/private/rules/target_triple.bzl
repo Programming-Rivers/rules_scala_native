@@ -87,3 +87,25 @@ def get_platform_link_flags(target_triple):
         return ["-luserenv", "-ldbghelp", "-lws2_32", "-lbcrypt", "-lcrypt32"]
     else:
         return ["-pthread", "-ldl", "-lm"]
+def get_linking_path(host_path_separator, clang_path, ar_path):
+    """Constructs the PATH environment variable for the Scala Native linker.
+
+    Args:
+        host_path_separator: The path separator for the host platform (':' or ';').
+        clang_path: Absolute path to the clang compiler.
+        ar_path: Absolute path to the archiver (ar / llvm-ar).
+
+    Returns:
+        A string containing the PATH environment variable.
+    """
+    paths = [
+        clang_path.rpartition("/")[0],
+        ar_path.rpartition("/")[0],
+    ]
+
+    # Add standard paths on POSIX for tools that might be needed by the linker
+    # discovery but are not part of the hermetic toolchain (e.g. system libs)
+    if host_path_separator == ":":
+        paths.extend(["/usr/bin", "/bin"])
+
+    return host_path_separator.join(paths)
