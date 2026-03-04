@@ -98,14 +98,33 @@ def get_linking_path(host_path_separator, clang_path, ar_path):
     Returns:
         A string containing the PATH environment variable.
     """
-    paths = [
-        clang_path.rpartition("/")[0],
-        ar_path.rpartition("/")[0],
-    ]
+    # Use a dict to deduplicate paths while preserving order
+    unique_paths = {}
 
-    # Add standard paths on POSIX for tools that might be needed by the linker
+    def add_path(p):
+        if p and p not in unique_paths:
+            unique_paths[p] = True
+
+    def get_dir(p):
+        # Bazel usually uses forward slashes even on Windows, but check for both.
+        # rpartition returns (before, separator, after)
+        for sep in ["/", "\\"]:
+            before, s, _ = p.rpartition(sep)
+            if s:
+                return before
+        return ""
+
+    add_path(get_dir(clang_path))
+    add_path(get_dir(ar_path))
+
+    # Add standard paths for tools that might be needed by the linker
     # discovery but are not part of the hermetic toolchain (e.g. system libs)
     if host_path_separator == ":":
-        paths.extend(["/usr/bin", "/bin"])
+        add_path("/usr/bin")
+        add_path("/bin")
+    elif host_path_separator == ";":
+        # Standard Windows system paths
+        add_path("C:\\Windows\\System32")
+        add_path("C:\\Windows")
 
-    return host_path_separator.join(paths)
+    return host_path_separator.join(unique_paths.keys())

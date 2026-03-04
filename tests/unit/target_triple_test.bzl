@@ -320,13 +320,13 @@ _platform_flags_none_triple_test = unittest.make(
 
 def _linking_path_posix_test_impl(ctx):
     env = unittest.begin(ctx)
-    # POSIX uses ':' and includes /usr/bin, /bin
+    # POSIX uses ':' and includes /usr/bin, /bin. It should also deduplicate.
     result = get_linking_path(
         ":",
         "/path/to/llvm/bin/clang",
         "/path/to/llvm/bin/ar",
     )
-    asserts.equals(env, "/path/to/llvm/bin:/path/to/llvm/bin:/usr/bin:/bin", result)
+    asserts.equals(env, "/path/to/llvm/bin:/usr/bin:/bin", result)
     return unittest.end(env)
 
 _linking_path_posix_test = unittest.make(
@@ -335,13 +335,13 @@ _linking_path_posix_test = unittest.make(
 
 def _linking_path_windows_test_impl(ctx):
     env = unittest.begin(ctx)
-    # Windows uses ';' and should NOT include /usr/bin, /bin
+    # Windows uses ';' and should include System32, and deduplicate.
     result = get_linking_path(
         ";",
         "C:/llvm/bin/clang.exe",
         "C:/llvm/bin/llvm-ar.exe",
     )
-    asserts.equals(env, "C:/llvm/bin;C:/llvm/bin", result)
+    asserts.equals(env, "C:/llvm/bin;C:\\Windows\\System32;C:\\Windows", result)
     return unittest.end(env)
 
 _linking_path_windows_test = unittest.make(
@@ -360,6 +360,22 @@ def _linking_path_different_dirs_test_impl(ctx):
 
 _linking_path_different_dirs_test = unittest.make(
     _linking_path_different_dirs_test_impl,
+)
+
+def _linking_path_dedup_test_impl(ctx):
+    env = unittest.begin(ctx)
+    # Test that duplicate paths are removed even if they come from different sources
+    result = get_linking_path(
+        ":",
+        "/usr/bin/clang",
+        "/usr/bin/ar",
+    )
+    # /usr/bin is added by clang/ar paths AND by default POSIX paths, should only appear once.
+    asserts.equals(env, "/usr/bin:/bin", result)
+    return unittest.end(env)
+
+_linking_path_dedup_test = unittest.make(
+    _linking_path_dedup_test_impl,
 )
 
 # ===========================================================================
@@ -404,4 +420,5 @@ def target_triple_test_suite(name):
         _linking_path_posix_test,
         _linking_path_windows_test,
         _linking_path_different_dirs_test,
+        _linking_path_dedup_test,
     )
