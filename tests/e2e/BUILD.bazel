@@ -8,8 +8,15 @@ load(
 default_test_runner(
     name = "default_test_runner",
     bazel_cmds = [
-        "info",
-        "build //...",
+        # Throttle the child Bazel process to prevent "resource usage snowball".
+        # Without these caps, each end-to-end test thinks it owns the entire machine.
+        # See: .bazelrc --config=e2e for the parent-side serialisation.
+        " --quiet" +
+        " build //..." +
+        " --jobs=2" +
+        " --local_resources=cpu=1" +
+        " --local_resources=memory=1024" +
+        " --worker_multiplex=false",
     ],
 )
 
@@ -43,6 +50,7 @@ EXAMPLE_WORKSPACES = [
         workspace_files = ["//:local_repository_files"],
         workspace_path = workspace,
         tags = ["exclusive"],
+        size = "enormous",
     )
     for workspace in EXAMPLE_WORKSPACES
 ]
