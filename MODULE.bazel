@@ -9,7 +9,6 @@ module(
     name = "rules_scala_native",
     version = "0.0.0",
     bazel_compatibility = [">=9.0.0"],
-    compatibility_level = 0,
 )
 
 SCALA_VERSION = "3.8.1"
