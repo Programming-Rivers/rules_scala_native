@@ -22,10 +22,10 @@ This project provides two main rules:
 ```python
 module(name = "my_scala_native_app")
 
-bazel_dep(name = "protobuf", version = "33.4")
-bazel_dep(name = "rules_scala", version = "7.2.2")
-bazel_dep(name = "rules_scala_native", version = "0.1.0")
-bazel_dep(name = "llvm", version = "0.5.4")
+bazel_dep(name = "protobuf", version = "36.2")
+bazel_dep(name = "rules_scala", version = "7.3.0")
+bazel_dep(name = "rules_scala_native", version = "0.1.1-rc4")
+bazel_dep(name = "llvm", version = "0.8.23")
 
 # Register hermetic C++ toolchain (clang/lld) for cross-compilation
 register_toolchains(
@@ -37,7 +37,7 @@ scala_config = use_extension(
     "@rules_scala//scala/extensions:config.bzl",
     "scala_config",
 )
-scala_config.settings(scala_version = "3.8.1")
+scala_config.settings(scala_version = "3.9.0")
 use_repo(scala_config, "rules_scala_config")
 
 scala_deps = use_extension(
@@ -143,10 +143,10 @@ Cross-compilation is as easy as passing the `--platforms` flag to Bazel:
 
 | Platform    | Architectures  | C Library / Toolchain   | Build        | Execution     |
 | :---------- | :------------- | :---------------------- | :----------- | :------------ |
-| Linux       | aarch64        | glibc (2.28—2.42), musl | ✅ Succeeded | ❓ Not tested |
+| Linux       | aarch64        | glibc (2.28—2.42), musl | ✅ Succeeded | ✅ Not tested |
 | Linux       | x86_64         | glibc (2.28—2.42), musl | ✅ Succeeded | ✅ Succeeded  |
 | macOS       | aarch64        | Native Apple SDK        | ✅ Succeeded | ✅ Succeeded  |
-| macOS       | x86_64         | Native Apple SDK        | ✅ Succeeded | ❓ Not tested |
+| macOS       | x86_64         | Native Apple SDK        | ✅ Succeeded | ✅ Not tested |
 | Windows     | aarch64        | -                       | ✅ Succeeded | ❓ Not tested |
 | Windows     | x86_64         | -                       | ✅ Succeeded | ❓ Not tested |
 

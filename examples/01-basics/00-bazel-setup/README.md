@@ -118,7 +118,7 @@ bazel_dep(name = "rules_scala_native", version = "0.1.0")
 
 # Configure Scala
 scala_config = use_extension("@rules_scala//scala/extensions:config.bzl", "scala_config")
-scala_config.settings(scala_version = "3.8.1")  # Configure Scala version
+scala_config.settings(scala_version = "3.9.0")  # Configure Scala version
 scala_deps = use_extension("@rules_scala//scala/extensions:deps.bzl", "scala_deps")
 scala_deps.scala()
 use_repo(scala_deps, "rules_scala_toolchains")
