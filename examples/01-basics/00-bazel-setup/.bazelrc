@@ -3,3 +3,4 @@ common --tool_java_runtime_version=remotejdk_17
 common --java_runtime_version=remotejdk_17
 # Optional: Fetch precompieled protoc to make builds faster.
 common --@protobuf//bazel/toolchains:prefer_prebuilt_protoc
+common --symlink_prefix=/
