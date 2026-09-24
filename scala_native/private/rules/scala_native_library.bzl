@@ -177,6 +177,9 @@ _scala_native_base_library = rule(
         "//scala_native:toolchain_type",
         "@bazel_tools//tools/jdk:toolchain_type",
     ],
+    exec_groups = {
+        "scalac": exec_group(),
+    },
     cfg = scala_version_transition,
     provides = [JavaInfo, ScalaNativeInfo],
     implementation = _scala_native_library_impl,
