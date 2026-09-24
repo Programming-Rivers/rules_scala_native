@@ -119,18 +119,12 @@ This project still needs the `rules_cc` and an LLVM toolchain, which are provide
 
 ```python
 # Build rules that Bazel needs to compile, link, and produce artifacts from C or C++ source code.
-bazel_dep(
-    name = "rules_cc",
-    version = "0.2.16",
-)
+bazel_dep(name = "rules_cc", version = "0.2.16")
 
 # ...
 
 # Use the hermetic, zero-sysroot LLVM toolchain.
-bazel_dep(
-    name = "llvm",
-    version = "0.6.1",
-)
+bazel_dep(name = "llvm", version = "0.6.1")
 ```
 
 ## Next Steps

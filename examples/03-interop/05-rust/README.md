@@ -112,10 +112,7 @@ scala_native_binary(
 To compile Rust, you must include `rules_rust` and register a Rust toolchain in your module setup:
 
 ```python
-bazel_dep(
-    name = "rules_rust",
-    version = "0.68.1",
-)
+bazel_dep(name = "rules_rust", version = "0.68.1")
 
 # ...
 

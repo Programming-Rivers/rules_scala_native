@@ -131,10 +131,7 @@ scala_native_binary(
 To compile Zig code, you must include `rules_zig` and register a Zig toolchain in your module setup:
 
 ```python
-bazel_dep(
-    name = "rules_zig",
-    version = "0.12.3",
-)
+bazel_dep(name = "rules_zig", version = "0.12.3")
 
 # ...
 

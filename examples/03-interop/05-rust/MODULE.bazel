@@ -4,57 +4,27 @@ Test rulesets for Scala Native work as expected as a standalone module.
 
 module(name = "scala_native_example")
 
-bazel_dep(
-    name = "protobuf",
-    version = "36.2",
-)
-bazel_dep(
-    name = "rules_scala",
-    version = "7.3.0",
-)
-bazel_dep(
-    name = "rules_cc",
-    version = "0.2.16",
-)
-bazel_dep(
-    name = "rules_scala_native",
-    version = "0.1.0",
-)
-bazel_dep(
-    name = "rules_rust",
-    version = "0.68.1",
-)
-bazel_dep(
-    name = "rules_zig",
-    version = "0.12.3",
-)
-bazel_dep(
-    name = "gazelle",
-    version = "0.38.0",
-    repo_name = "bazel_gazelle",
-)
+bazel_dep(name = "llvm", version = "0.8.23")
+bazel_dep(name = "protobuf", version = "36.2")
+bazel_dep(name = "rules_cc", version = "0.2.25")
+bazel_dep(name = "rules_scala", version = "7.3.0")
+bazel_dep(name = "rules_scala_native", version = "0.1.0")
+bazel_dep(name = "rules_rust", version = "0.69.0")
 
 local_path_override(
     module_name = "rules_scala_native",
     path = "../../..",
 )
 
-bazel_dep(name = "llvm", version = "0.6.1")
 
 register_toolchains(
     "@llvm//toolchain:all",
 )
 
-zig = use_extension("@rules_zig//zig:extensions.bzl", "zig")
-zig.toolchain(zig_version = "0.14.1")
-use_repo(zig, "zig_toolchains")
-
-register_toolchains("@zig_toolchains//:all")
-
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
 rust.toolchain(
     edition = "2024",
-    versions = ["1.93.0"],
+    versions = ["1.98.1"],
 )
 use_repo(rust, "rust_toolchains")
 

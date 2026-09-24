@@ -72,10 +72,7 @@ and provide a C toolchain to Bazel.
 
 ```python
 # Build rules that Bazel needs to compile, link, and produce artifacts from C or C++ source code.
-bazel_dep(
-    name = "rules_cc",
-    version = "0.2.16",
-)
+bazel_dep(name = "rules_cc", version = "0.2.16")
 
 # ... 
 
@@ -84,10 +81,7 @@ bazel_dep(
 #     ensuring bit-by-bit reproducibility.
 # A zero-sysroot toolchain provides its own C library and headers,
 #     avoiding host dependencies, making cross-compilation easier and more reliable.
-bazel_dep(
-    name = "llvm",
-    version = "0.6.1",
-)
+bazel_dep(name = "llvm", version = "0.6.1")
 ```
 
 Providinng a hermatic toolchain is not mandatory,

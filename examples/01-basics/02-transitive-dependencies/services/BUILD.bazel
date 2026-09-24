@@ -9,5 +9,5 @@ scala_native_library(
     deps = [
         "//core:char_operations",
     ],
-    visibility = ["//:__subpackages__"]
+    visibility = ["//visibility:public"]
 )

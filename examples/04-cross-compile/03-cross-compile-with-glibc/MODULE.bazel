@@ -1,12 +1,9 @@
 module(name = "example_03_cross_compile_with_glibc")
 
+bazel_dep(name = "llvm", version = "0.8.23")
 bazel_dep(name = "protobuf", version = "36.2")
 bazel_dep(name = "rules_scala", version = "7.3.0")
 bazel_dep(name = "rules_scala_native", version = "0.1.0")
-
-# To cross-compile, we need a C/C++ toolchain.
-# llvm provides a hermetic, zero-sysroot LLVM toolchain.
-bazel_dep(name = "llvm", version = "0.6.1")
 
 local_path_override(
     module_name = "rules_scala_native",
