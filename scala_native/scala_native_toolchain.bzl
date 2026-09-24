@@ -78,7 +78,7 @@ scala_native_toolchain = rule(
             doc = "The Scala Native Windows API bindings library (needed for cross-compilation to Windows)",
         ),
         "scala_native_version": attr.string(
-            default = "0.5.10",
+            default = "0.5.12",
             doc = "The Scala Native version",
         ),
         "target_triple": attr.string(

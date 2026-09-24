@@ -11,8 +11,8 @@ This project provides two main rules:
 ## Requirements
 
 - **Bazel 9+** (bzlmod only, no WORKSPACE support)
-- **Scala 3.8.1**
-- **Scala Native 0.5.10**
+- **Scala 3.9.0**
+- **Scala Native 0.5.12**
 - **Linux, macOS, Windows** (x86_64, aarch64)
 
 ## Quick Start
@@ -344,8 +344,8 @@ This project depends on:
 
 ## Current Limitations
 
-- Only Scala 3.8.1 is supported
-- Only Scala Native 0.5.10 is supported
+- Only Scala 3.9.0 is supported
+- Only Scala Native 0.5.12 is supported
 - Windows and WebAssembly support is currently work-in-progress.
 
 ## Related

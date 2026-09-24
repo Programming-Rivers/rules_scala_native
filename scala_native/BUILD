@@ -22,7 +22,7 @@ scala_native_toolchain(
     test_interface = "@org_scala_native_test_interface//jar",
     junit_runtime = "@org_scala_native_junit_runtime//jar",
     windowslib = "@org_scala_native_windowslib//jar",
-    scala_native_version = "0.5.10",
+    scala_native_version = "0.5.12",
     visibility = ["//visibility:public"],
 )
 

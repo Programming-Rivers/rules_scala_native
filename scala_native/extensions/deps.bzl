@@ -129,13 +129,117 @@ _SCALA_NATIVE_ARTIFACTS = {
             ],
         },
     },
+    "0.5.12": {
+        "org_junit_junit": {
+            "artifact": "junit:junit:4.12",
+            "sha256": "59721f0805e223d84b90677887d9ff567dc534d7c502ca903c0c2b17f05c116a",
+            "deps": [],
+        },
+        "org_scala_native_nscplugin": {
+            "artifact": "org.scala-native:nscplugin_3.9.0:0.5.12",
+            "sha256": "c36ad6d8b7a943d46b25c0b1a560351a79f35f952c62c8a9ec03ba8ff7a1f37d",
+            "deps": [],
+        },
+        "org_scala_native_scalalib": {
+            "artifact": "org.scala-native:scalalib_native0.5_3:jar:3.9.0+0.5.12",
+            "sha256": "50fe972cf958bbb0f350a2aa0f16916f2ed8089232331e00a7004321576652cf",
+            "deps": [],
+        },
+        "org_scala_native_nativelib": {
+            "artifact": "org.scala-native:nativelib_native0.5_3:0.5.12",
+            "sha256": "b05fe9855ca50ac60854de6700f518e031df76c85021727505dab660d8757886",
+            "deps": [],
+        },
+        "org_scala_native_nir": {
+            "artifact": "org.scala-native:nir_3:0.5.12",
+            "sha256": "0495e3dd179697748bc2c0de9d339bdd3b5f0328579863ad9c5c8b1bd1b214b7",
+            "deps": [
+                "@org_scala_native_util",
+            ],
+        },
+        "org_scala_native_clib": {
+            "artifact": "org.scala-native:clib_native0.5_3:0.5.12",
+            "sha256": "c1d1ae542473bfdfacd1f27c41db2f6eae7ce665a0a61500e61d3b0e307fdad0",
+            "deps": [],
+        },
+        "org_scala_native_posixlib": {
+            "artifact": "org.scala-native:posixlib_native0.5_3:0.5.12",
+            "sha256": "25d292daace63da5b468d82bf0f830ca381800b69c364d18f714f18f95cd5dde",
+            "deps": [],
+        },
+        "org_scala_native_javalib": {
+            "artifact": "org.scala-native:javalib_native0.5_3:0.5.12",
+            "sha256": "1a643e587e7e4da38a6ce989a7541df2bf5a6d290372e50765e0c78d21695af4",
+            "deps": [
+                "@org_scala_native_clib",
+                "@org_scala_native_posixlib",
+            ],
+        },
+        "org_scala_native_auxlib": {
+            "artifact": "org.scala-native:auxlib_native0.5_3:0.5.12",
+            "sha256": "f3bd2ead9788b9c90b2758e2e1f4988168b0b65674a7a1affc485ab4661a1c29",
+            "deps": [],
+        },
+        "org_scala_native_tools": {
+            "artifact": "org.scala-native:tools_3:0.5.12",
+            "sha256": "3c0fc9d691ba46f9775c23ec044598a27d0f89df3fcaa2f25fecec38b84f53c3",
+            "deps": [
+                "@org_scala_native_nativelib",
+                "@org_scala_native_javalib",
+                "@org_scala_native_scalalib",
+            ],
+        },
+        "org_scala_native_util": {
+            "artifact": "org.scala-native:util_3:0.5.12",
+            "sha256": "5bb27f5db7c9135cd820b7c9eb5af1a828e4dcf5711e3b2c710984bca9a1ea61",
+            "deps": [],
+        },
+        "org_scala_native_test_interface_sbt_defs": {
+            "artifact": "org.scala-native:test-interface-sbt-defs_native0.5_3:0.5.12",
+            "sha256": "93d310e6cfa45f65e4f099c5d3369879f6b83ad12db2c8bd219df5b961aefb1d",
+            "deps": [],
+        },
+        "org_scala_native_test_interface": {
+            "artifact": "org.scala-native:test-interface_native0.5_3:0.5.12",
+            "sha256": "15627a87c6c7622ba8e2c7bfd71f10c23b3b325247488c46ceed6c109e5fd38e",
+            "deps": [
+                "@org_scala_native_nativelib",
+                "@org_scala_native_javalib",
+                "@org_scala_native_scalalib",
+                "@org_scala_native_test_interface_sbt_defs",
+            ],
+        },
+        "org_scala_native_junit_runtime": {
+            "artifact": "org.scala-native:junit-runtime_native0.5_3:0.5.12",
+            "sha256": "1070897b760622f5da4a72dc80d9b6b88ac9955a1c74980f63cd0ef9b3c31ff4",
+            "deps": [
+                "@org_scala_native_nativelib",
+                "@org_scala_native_javalib",
+                "@org_scala_native_scalalib",
+                "@org_junit_junit",
+                "@org_scala_native_test_interface",
+            ],
+        },
+        "org_scala_native_junit_plugin": {
+            "artifact": "org.scala-native:junit-plugin_3.9.0:0.5.12",
+            "sha256": "684b22655beaddf05661d79dcaee6f2a0ee7aa2dd4e91bd21d3dc524aba70f85",
+            "deps": [],
+        },
+        "org_scala_native_windowslib": {
+            "artifact": "org.scala-native:windowslib_native0.5_3:0.5.12",
+            "sha256": "88a5664596bfb750c57946cae4c9adac30f3e696d3c57667fa57c2fdd06badac",
+            "deps": [
+                "@org_scala_native_nativelib",
+            ],
+        },
+    },
 }
 
 _toolchain_tag = tag_class(
     attrs = {
         "scala_native_version": attr.string(
-            default = "0.5.10",
-            doc = "The version of Scala Native to use. Default is 0.5.10.",
+            default = "0.5.12",
+            doc = "The version of Scala Native to use. Default is 0.5.12.",
         ),
     },
 )
@@ -143,7 +247,7 @@ _toolchain_tag = tag_class(
 def _scala_native_deps_impl(module_ctx):
     maven_servers = default_maven_server_urls()
 
-    scala_native_version = "0.5.10"
+    scala_native_version = "0.5.12"
     for mod in module_ctx.modules:
         for toolchain in mod.tags.toolchain:
             # Last one wins for now
