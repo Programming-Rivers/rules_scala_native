@@ -2,11 +2,11 @@ module(name = "example_02_c_structs_and_strings")
 
 bazel_dep(
     name = "protobuf",
-    version = "33.4",
+    version = "36.2",
 )
 bazel_dep(
     name = "rules_scala",
-    version = "7.2.2",
+    version = "7.3.0",
 )
 
 # build rules that Bazel needs to compile, link, and produce artifacts from C or C++ source code.

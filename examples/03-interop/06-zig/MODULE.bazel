@@ -6,11 +6,11 @@ module(name = "scala_native_example")
 
 bazel_dep(
     name = "protobuf",
-    version = "33.4",
+    version = "36.2",
 )
 bazel_dep(
     name = "rules_scala",
-    version = "7.2.2",
+    version = "7.3.0",
 )
 bazel_dep(
     name = "rules_scala_native",

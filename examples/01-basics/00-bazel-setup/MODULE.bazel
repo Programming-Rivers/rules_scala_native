@@ -1,7 +1,7 @@
 module(name = "example_00_bazel_setup")
 
-bazel_dep(name = "protobuf", version = "33.4")
-bazel_dep(name = "rules_scala", version = "7.2.2")
+bazel_dep(name = "protobuf", version = "36.2")
+bazel_dep(name = "rules_scala", version = "7.3.0")
 bazel_dep(name = "rules_scala_native", version = "0.1.0")
 # The local_path_override is not needed when using a release version of rules_scala_native.
 # It is used here to point to the local checkout of rules_scala_native.

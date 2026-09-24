@@ -1,8 +1,8 @@
 module(name = "example_04_cross_compile_dependencies")
 
-bazel_dep(name = "protobuf", version = "33.4")
+bazel_dep(name = "protobuf", version = "36.2")
 bazel_dep(name = "rules_cc", version = "0.2.16")
-bazel_dep(name = "rules_scala", version = "7.2.2")
+bazel_dep(name = "rules_scala", version = "7.3.0")
 bazel_dep(name = "rules_scala_native", version = "0.1.0")
 bazel_dep(name = "llvm", version = "0.6.1")
 

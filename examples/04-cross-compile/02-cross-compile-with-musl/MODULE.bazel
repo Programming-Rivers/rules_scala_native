@@ -1,7 +1,7 @@
 module(name = "example_02_cross_compile_with_musl")
 
-bazel_dep(name = "protobuf", version = "33.4")
-bazel_dep(name = "rules_scala", version = "7.2.2")
+bazel_dep(name = "protobuf", version = "36.2")
+bazel_dep(name = "rules_scala", version = "7.3.0")
 bazel_dep(name = "rules_scala_native", version = "0.1.0")
 # To cross-compile, we need a C/C++ toolchain.
 # llvm provides a hermetic, zero-sysroot LLVM toolchain.
