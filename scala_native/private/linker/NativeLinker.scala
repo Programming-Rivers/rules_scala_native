@@ -197,8 +197,15 @@ object NativeLinker {
     def makeAbsolute(optsSeq: Seq[String]): Seq[String] = optsSeq.map { opt =>
       if (!opt.startsWith("-") && !opt.startsWith("/") && execRoot.resolve(opt).toFile.exists()) {
         execRoot.resolve(opt).toString
-      } else if (opt.startsWith("--sysroot=") && !opt.substring(10).startsWith("/") && execRoot.resolve(opt.substring(10)).toFile.exists()) {
-        "--sysroot=" + execRoot.resolve(opt.substring(10)).toString
+      } else if (opt.contains("=")) {
+        val eqIdx = opt.indexOf('=')
+        val prefix = opt.substring(0, eqIdx + 1)
+        val path = opt.substring(eqIdx + 1)
+        if (!path.startsWith("/") && execRoot.resolve(path).toFile.exists()) {
+          prefix + execRoot.resolve(path).toString
+        } else {
+          opt
+        }
       } else {
         opt
       }
